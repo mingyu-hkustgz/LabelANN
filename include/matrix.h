@@ -17,7 +17,7 @@
 #include <cstring>
 #include <assert.h>
 #include <omp.h>
-
+#include "utils.h"
 template<typename T>
 class Matrix {
 private:
@@ -159,22 +159,36 @@ Matrix<T>::Matrix(char *data_file_path) {
         std::cout << "open file error" << std::endl;
         exit(-1);
     }
-    in.read((char *) &d, 4);
-
-    std::cerr << "Dimensionality - " << d << std::endl;
-    in.seekg(0, std::ios::end);
-    std::ios::pos_type ss = in.tellg();
-    size_t fsize = (size_t) ss;
-    n = (size_t) (fsize / (sizeof(T) * d + 4));
-    // n = (size_t)(fsize / (d + 1) / 4);
-    data = new T[(size_t) n * (size_t) d + 10];
-    std::cerr << "Cardinality - " << n << std::endl;
-    in.seekg(0, std::ios::beg);
-    for (size_t i = 0; i < n; i++) {
-        in.seekg(4, std::ios::cur);
-        in.read((char *) (data + i * d), d * sizeof(T));
+    std::string file_type(data_file_path);
+    if (endsWith(file_type,"bin") || endsWith(file_type,"fbin"))
+    {
+        in.read((char *) &n, 4);
+        in.read((char *) &d, 4);
+        std::cerr << "Dimensionality bin - " << d << std::endl;
+        std::cerr << "Cardinality bin - " << n << std::endl;
+        data = new T[(size_t) n * (size_t) d + 10];
+        for (size_t i = 0; i < n; i++) {
+            in.read((char *) (data + i * d), d * sizeof(T));
+        }
+        in.close();
     }
-    in.close();
+    else{
+        in.read((char *) &d, 4);
+        std::cerr << "Dimensionality vecs - " << d << std::endl;
+        in.seekg(0, std::ios::end);
+        std::ios::pos_type ss = in.tellg();
+        size_t fsize = (size_t) ss;
+        n = (size_t) (fsize / (sizeof(T) * d + 4));
+        // n = (size_t)(fsize / (d + 1) / 4);
+        data = new T[(size_t) n * (size_t) d + 10];
+        std::cerr << "Cardinality vecs - " << n << std::endl;
+        in.seekg(0, std::ios::beg);
+        for (size_t i = 0; i < n; i++) {
+            in.seekg(4, std::ios::cur);
+            in.read((char *) (data + i * d), d * sizeof(T));
+        }
+        in.close();
+    }
 }
 
 template<typename T>

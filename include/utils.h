@@ -1,7 +1,7 @@
 //
 // Created by mingyu on 23-8-21.
 //
-
+#pragma once
 #include <chrono>
 #include <queue>
 #include <unordered_set>
@@ -34,10 +34,6 @@
 #endif
 #define RANG_BOUND 1024
 #define EPS_GROUND 1e-4
-#ifndef RANGANN_UTILS_H
-
-unsigned index_dist_calc = 0;
-unsigned filter_dist_calc = 0;
 
 struct Neighbor {
     unsigned id;
@@ -53,38 +49,12 @@ struct Neighbor {
     }
 };
 
-struct SegQuery {
-    SegQuery() {
-        L = 0;
-        R = 0;
-        data_ = nullptr;
+bool endsWith(const std::string& str, const std::string& suffix) {
+    if (str.length() < suffix.length()) {
+        return false;
     }
-
-    SegQuery(unsigned left_range, unsigned right_range, float *data) {
-        L = left_range;
-        R = right_range;
-        data_ = data;
-    }
-
-    hnswlib::labeltype L, R;
-    float *data_;
-};
-
-class RangeFilter : public hnswlib::BaseFilterFunctor {
-public:
-    hnswlib::labeltype L, R;
-
-    RangeFilter(hnswlib::labeltype left, hnswlib::labeltype right) {
-        L = left;
-        R = right;
-    }
-
-    bool operator()(hnswlib::labeltype id) override {
-        if (L <= id && id <= R) return true;
-        else return false;
-    }
-};
-
+    return str.compare(str.length() - suffix.length(), suffix.length(), suffix) == 0;
+}
 
 typedef std::priority_queue<std::pair<float, hnswlib::labeltype>> ResultQueue;
 
@@ -137,91 +107,6 @@ inline float sqr_dist(float *d, float *q, uint32_t L) {
         q++;
     }
     return ret;
-}
-
-ResultQueue bruteforce_range_search(SegQuery Q, float *base, unsigned D, unsigned K) {
-    ResultQueue res;
-    for (unsigned i = Q.L; i <= Q.R; i++) {
-        float dist = sqr_dist(Q.data_, base + i * D, D);
-        if (res.size() < K)
-            res.emplace(dist, i);
-        else if (dist < res.top().first) {
-            res.pop();
-            res.emplace(dist, i);
-        }
-    }
-    return res;
-}
-
-void generata_range_ground_truth_with_fix_length(unsigned query_num, unsigned base_num, int length,
-                                                 unsigned D, unsigned K, float *base, float *query,
-                                                 std::vector<SegQuery> &Q, std::vector<std::vector<unsigned >> &gt) {
-    Q.resize(query_num);
-    gt.resize(query_num);
-    for (int i = 0; i < query_num; i++) {
-        unsigned L = 0, R = 0;
-        if(length>0){
-            if(length!=base_num)
-                L = rand() %(base_num - length);
-            R = L + length - 1;
-        }else{
-            L = rand()%base_num;
-            R = rand()%base_num;
-            if(L > R) std::swap(L,R);
-        }
-
-        Q[i].L = L;
-        Q[i].R = R;
-        Q[i].data_ = query + i * D;
-        auto res = bruteforce_range_search(Q[i], base, D, K);
-        gt[i].resize(K);
-        unsigned gt_back = K-1;
-        while(!res.empty()){
-            gt[i][gt_back] = res.top().second;
-            res.pop();
-            gt_back--;
-        }
-    }
-    std::cerr<<"Ground Truth Finished"<<std::endl;
-}
-
-void generata_half_range_ground_truth_with_fix_length(unsigned query_num, unsigned base_num, int length,
-                                                 unsigned D, unsigned K, float *base, float *query,
-                                                 std::vector<SegQuery> &Q, std::vector<std::vector<unsigned >> &gt) {
-    Q.resize(query_num);
-    gt.resize(query_num);
-    for (int i = 0; i < query_num; i++) {
-        unsigned L = 0, R = 0;
-        if(length > 0)
-            R = (length-1);
-        else
-            R = rand()%base_num;
-        Q[i].L = L;
-        Q[i].R = R;
-        Q[i].data_ = query + i * D;
-        auto res = bruteforce_range_search(Q[i], base, D, K);
-        gt[i].resize(K);
-        unsigned gt_back = K-1;
-        while(!res.empty()){
-            gt[i][gt_back] = res.top().second;
-            res.pop();
-            gt_back--;
-        }
-    }
-    std::cerr<<"Ground Truth Finished"<<std::endl;
-}
-
-
-inline std::priority_queue<std::pair<float, hnswlib::labeltype> >
-merge_res(std::priority_queue<std::pair<float, hnswlib::labeltype> > res1,
-          std::priority_queue<std::pair<float, hnswlib::labeltype> > res2,
-          unsigned K) {
-    while (!res2.empty()) {
-        res1.emplace(res2.top());
-        res2.pop();
-    }
-    while (res1.size() > K) res1.pop();
-    return res1;
 }
 
 
@@ -509,4 +394,4 @@ inline void aligned_free(void *ptr) {
 #endif
 }
 
-#endif //RANGANN_UTILS_H
+

@@ -1,0 +1,1 @@
+add_executable(test_read_bin test_read_bin.cpp)
