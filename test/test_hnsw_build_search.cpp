@@ -5,7 +5,7 @@
 #include <fstream>
 #include <cstdio>
 #include <getopt.h>
-#include "Index-L.h"
+#include "IndexLabelOpt.h"
 using namespace std;
 
 
@@ -21,7 +21,7 @@ int main(int argc, char* argv[])
     };
 
     int ind;
-    int iarg = 0;
+    int iarg = 0, K =10;
     opterr = 1; //getopt error message (off: 0)
 
     char dataset[256] = "";
@@ -57,37 +57,36 @@ int main(int argc, char* argv[])
     std::vector<std::vector<int>> gt;
     gt.resize(Q.n);
     for (int i = 0; i < Q.n; i++){
-        gt[i].resize(100);
-        for (int j = 0; j < 100; j++){
+        gt[i].resize(K);
+        for (int j = 0; j < K; j++){
             gt[i][j] = G.data[i * 100 + j];
         }
-        std::cerr<<gt[i][0]<<" ";
     }
-
-    IndexLabel hnswl(X.n, X.d);
+    hnswlib::HierarchicalNSWStatic<float>::static_base_data_ = (char *) X.data;
+    IndexLabelOpt hnswl(X.n, X.d);
     hnswl.build_index(X);
+    hnswl.load_base_label("./DATA/sift/sift_base_12_labels_zipf.txt");
     std::vector efSearch{1, 2, 4, 8, 16, 32, 50, 64, 128, 150, 256, 300};
-    std::ofstream fout("./results/sift/sift.log");
+    std::ofstream fout("./results/sift/sift-static.log");
     for (auto ef : efSearch)
     {
         double segment_recall = 0.0, segment = 0.0, all_index_search_time = 0.0;
-        for (int i = 0; i < Q.n; i++)
-        {
+        for (int i = 0; i < Q.n; i++){
+            segment=0;
             ResultQueue ans1;
 
             auto s = chrono::high_resolution_clock::now();
-            ans1 = hnswl.naive_search(Q.data + i * Q.d, 10, ef);
+            ans1 = hnswl.naive_search(Q.data + i * Q.d, K, ef);
             auto e = chrono::high_resolution_clock::now();
             chrono::duration<double> diff = e - s;
             double time_slap1 = diff.count();
-            while (!ans1.empty())
-            {
+            while (!ans1.empty()){
                 auto v = ans1.top();
                 if (std::find(gt[i].begin(), gt[i].end(), v.second) != gt[i].end())
                     segment += 1.0;
                 ans1.pop();
             }
-            segment /= 10;
+            segment /= K;
             segment_recall += segment;
             all_index_search_time += time_slap1;
         }

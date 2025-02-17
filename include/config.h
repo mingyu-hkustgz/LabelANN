@@ -3,7 +3,11 @@
 
 #include <cstdint>
 #include <cstddef>
+#include <sstream>
+#include <fstream>
+#include <cstring>
 
+#define UNLIKELY(x) __builtin_expect(x, 0)
 
 namespace ANNS {
 

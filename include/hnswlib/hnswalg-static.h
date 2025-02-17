@@ -31,7 +31,6 @@ namespace hnswlib {
         size_t maxM0_{0};
         size_t ef_construction_{0};
         size_t ef_{ 0 };
-        size_t label_begin_{0};
 
         double mult_{0.0}, revSize_{0.0};
         int maxlevel_{0};
@@ -185,7 +184,9 @@ namespace hnswlib {
 
 
         inline labeltype getExternalLabel(tableint internal_id) const {
-            return internal_id;
+            labeltype return_label;
+            memcpy(&return_label, (data_level0_memory_ + internal_id * size_data_per_element_ + label_offset_), sizeof(labeltype));
+            return return_label;
         }
 
 
@@ -200,7 +201,7 @@ namespace hnswlib {
 
 
         inline char *getDataByInternalId(tableint internal_id) const {
-            return (static_base_data_ + (internal_id + label_begin_) * data_size_);
+            return (static_base_data_ + internal_id * data_size_);
         }
 
 
@@ -1286,7 +1287,7 @@ namespace hnswlib {
             }
             while (top_candidates.size() > 0) {
                 std::pair<dist_t, tableint> rez = top_candidates.top();
-                result.push(std::pair<dist_t, labeltype>(rez.first, getExternalLabel(rez.second) + label_begin_));
+                result.push(std::pair<dist_t, labeltype>(rez.first, getExternalLabel(rez.second)));
                 top_candidates.pop();
             }
             return result;
