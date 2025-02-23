@@ -17,3 +17,4 @@ local_test*
 *.index
 *.log
 *.png
+.uuid

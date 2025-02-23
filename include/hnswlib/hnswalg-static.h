@@ -201,7 +201,8 @@ namespace hnswlib {
 
 
         inline char *getDataByInternalId(tableint internal_id) const {
-            return (static_base_data_ + internal_id * data_size_);
+            auto Label = getExternalLabel(internal_id);
+            return (static_base_data_ + Label * data_size_);
         }
 
 
@@ -275,8 +276,10 @@ namespace hnswlib {
                     tableint candidate_id = *(datal + j);
 //                    if (candidate_id == 0) continue;
 #ifdef USE_SSE
-                    _mm_prefetch((char *) (visited_array + *(datal + j + 1)), _MM_HINT_T0);
-                    _mm_prefetch(getDataByInternalId(*(datal + j + 1)), _MM_HINT_T0);
+                    if(*(datal + j + 1) < size){
+                        _mm_prefetch((char *) (visited_array + *(datal + j + 1)), _MM_HINT_T0);
+                        _mm_prefetch(getDataByInternalId(*(datal + j + 1)), _MM_HINT_T0);
+                    }
 #endif
                     if (visited_array[candidate_id] == visited_array_tag) continue;
                     visited_array[candidate_id] = visited_array_tag;
@@ -1148,7 +1151,7 @@ namespace hnswlib {
                     throw std::runtime_error("The number of elements exceeds the specified limit");
                 }
 
-                cur_c = label;
+                cur_c = cur_element_count;
                 cur_element_count++;
                 label_lookup_[label] = cur_c;
             }
@@ -1238,7 +1241,7 @@ namespace hnswlib {
 
 
         std::priority_queue<std::pair<dist_t, labeltype >>
-        searchKnn(const void *query_data, size_t k, BaseFilterFunctor* isIdAllowed = nullptr) const {
+        searchKnn(const void *query_data, size_t k, size_t ef, BaseFilterFunctor* isIdAllowed = nullptr) const {
             std::priority_queue<std::pair<dist_t, labeltype >> result;
             if (cur_element_count == 0) return result;
 
@@ -1276,10 +1279,10 @@ namespace hnswlib {
             bool bare_bone_search = !num_deleted_ && !isIdAllowed;
             if (bare_bone_search) {
                 top_candidates = searchBaseLayerST<true>(
-                        currObj, query_data, std::max(ef_, k), isIdAllowed);
+                        currObj, query_data, std::max(ef, k), isIdAllowed);
             } else {
                 top_candidates = searchBaseLayerST<false>(
-                        currObj, query_data, std::max(ef_, k), isIdAllowed);
+                        currObj, query_data, std::max(ef, k), isIdAllowed);
             }
 
             while (top_candidates.size() > k) {

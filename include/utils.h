@@ -81,7 +81,10 @@ std::map<std::string, std::string> parse_kv_file(const std::string& filename) {
     in.close();
     return kv_map;
 }
-
+bool isFileExists_ifstream(const char *name) {
+    std::ifstream f(name);
+    return f.good();
+}
 
 void write_gt_file(const std::string& filename, const std::pair<ANNS::IdxType, float>* gt, uint32_t num_queries, uint32_t K) {
     std::ofstream fout(filename, std::ios::binary);
@@ -131,12 +134,8 @@ typedef std::priority_queue<std::pair<float, hnswlib::labeltype>> ResultQueue;
 #define RANGANN_UTILS_H
 
 
-bool isFileExists_ifstream(const char *name) {
-    std::ifstream f(name);
-    return f.good();
-}
 
-inline float sqr_dist(float *d, float *q, uint32_t L) {
+inline float sqr_dist(const float *d,const float *q, uint32_t L) {
     float PORTABLE_ALIGN32 TmpRes[8] = {0, 0, 0, 0, 0, 0, 0, 0};
     uint32_t num_blk16 = L >> 4;
     uint32_t l = L & 0b1111;
@@ -179,6 +178,35 @@ inline float sqr_dist(float *d, float *q, uint32_t L) {
     return ret;
 }
 
+
+void load_bitmap(const char *filename, std::vector<uint64_t> &label_bitmap, unsigned points_num) {
+    if (!isFileExists_ifstream(filename)) {
+        std::cerr << "Label File Not Exists" << std::endl;
+        return;
+    }
+    unsigned cumulate_points = 0;
+    std::ifstream fin(filename);
+    std::string line;
+    label_bitmap.reserve(points_num);
+    unsigned max_bits = 0;
+    while (std::getline(fin, line)) {
+        cumulate_points ++;
+        uint64_t bitmap = 0;
+        std::istringstream iss(line);
+        std::string token;
+        std::vector<std::string> tokens;
+        while (std::getline(iss, token, ',')) {
+            tokens.push_back(token);
+        }
+        for (const auto &t: tokens) {
+            bitmap |= (1 << (std::atoi(t.c_str()) - 1));
+        }
+        label_bitmap.push_back(bitmap);
+        if (_mm_popcnt_u64(bitmap) > max_bits) max_bits = _mm_popcnt_u64(bitmap);
+        if(cumulate_points==points_num) break;
+    }
+    std::cerr << "Max bits:" << max_bits << std::endl;
+}
 
 void load_float_data(char *filename, float *&data, unsigned &num,
                      unsigned &dim) {  // load data with sift10K pattern

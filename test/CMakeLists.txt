@@ -1,4 +1,6 @@
-add_executable(test_hnsw_build_search test_hnsw_build_search.cpp)
+add_executable(test_hnsw_build test_hnsw_build.cpp)
+
+add_executable(test_hnsw_search test_hnsw_search.cpp)
 
 add_executable(test_vamana_build test_vamana_build.cpp)
 target_link_libraries(test_vamana_build Boost::program_options)
