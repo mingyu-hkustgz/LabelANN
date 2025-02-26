@@ -298,14 +298,14 @@ public:
 
     void find_cover_father() {
         std::unordered_map<uint64_t, double> cover_ratio;
-        for (auto item: selected_bitmap) {
-            indexed_points += bitmap_list[item].size();
-            for (auto element: bitmap_list[item]) {
+        for (auto father: selected_bitmap) {
+            indexed_points += bitmap_list[father].size();
+            for (auto son: cover_set_[father]) {
                 double element_elastic_factor =
-                        (double) bitmap_list[element].size() / (double) bitmap_list[item].size();
-                if (element_elastic_factor > cover_ratio[element]) {
-                    cover_ratio[element] = element_elastic_factor;
-                    fa_[element] = item;
+                        (double) bitmap_list[son].size() / (double) bitmap_list[father].size();
+                if (element_elastic_factor > cover_ratio[son]) {
+                    cover_ratio[son] = element_elastic_factor;
+                    fa_[son] = father;
                 }
             }
         }
@@ -401,6 +401,7 @@ public:
     void save_elastic_index(char *filename) {
         std::ofstream fout(filename, std::ios::binary);
         unsigned map_size = bitmap_list.size();
+        std::cerr<<bitmap_list.size()<<std::endl;
         fout.write((char *) &map_size, sizeof(unsigned));
         for (auto u: bitmap_list) {
             unsigned size = u.second.size();
@@ -419,17 +420,22 @@ public:
         unsigned map_size, size;
         uint64_t cumulate_points = 0;
         fin.read((char *) &map_size, sizeof(unsigned));
+        std::cerr<<map_size<<std::endl;
         for (int i = 0; i < map_size; i++) {
             uint64_t bitmap, father;
             fin.read((char *) &bitmap, sizeof(uint64_t));
             fin.read((char *) &size, sizeof(unsigned));
+            std::cerr<<bitmap<<" "<<size<<std::endl;
             cumulate_points += size;
             bitmap_list[bitmap].resize(size);
             fin.read((char *) bitmap_list[bitmap].data(), sizeof(size_t) * (size_t) size);
             fin.read((char *) &father, sizeof(uint64_t));
             fa_[bitmap] = father;
-            if (size >= INDEX_ELASIIC_BOUND && fa_[bitmap] == bitmap)
+            std::cerr<<bitmap<<" "<<father<<std::endl;
+            if (size >= INDEX_ELASIIC_BOUND && fa_[bitmap] == bitmap){
+                std::cerr<<"LOAD bitmap:: "<<bitmap<<std::endl;
                 load_single_static_index(appr_alg_list[bitmap], fin, bitmap);
+            }
         }
         power_points = cumulate_points;
         std::cerr << "All Points:: " << cumulate_points << std::endl;
@@ -444,7 +450,6 @@ public:
     std::unordered_map<uint64_t, std::vector<size_t> > bitmap_list;
     std::unordered_map<uint64_t, uint64_t> fa_;
     std::unordered_map<uint64_t, hnswlib::HierarchicalNSWStatic<float> *> appr_alg_list;
-    std::vector<std::pair<hnswlib::labeltype, hnswlib::labeltype> > index_range_list;
     float *data_;
 };
 

@@ -54,15 +54,15 @@ int main(int argc, char *argv[]) {
     sprintf(query_path, "%s%s_query.bin", source, dataset);
     sprintf(data_path, "%s%s_base.bin", source, dataset);
     sprintf(index_path, "%s%s_opt.hnsw", source, dataset);
-    sprintf(ground_path, "%s%s_gt_12_labels_zipf_containment.bin", source, dataset);
+    sprintf(ground_path, "%s%s_gt_3_labels_zipf_containment.bin", source, dataset);
     Matrix<float> X(data_path);
     Matrix<float> Q(query_path);
     auto gt = new std::pair<ANNS::IdxType, float>[Q.n * K];
     load_gt_file(ground_path, gt, Q.n, K);
     hnswlib::HierarchicalNSWStatic<float>::static_base_data_ = (char *) X.data;
     IndexLabelOpt hnsw_opt(X.n, X.d);
-    hnsw_opt.load_base_label_bitmap("./DATA/sift/sift_base_12_labels_zipf.txt");
-    hnsw_opt.load_query_label_bitmap("./DATA/sift/sift_query_12_labels_zipf_containment.txt", Q.n);
+    hnsw_opt.load_base_label_bitmap("./DATA/sift/sift_base_3_labels_zipf.txt");
+    hnsw_opt.load_query_label_bitmap("./DATA/sift/sift_query_3_labels_zipf_containment.txt", Q.n);
     hnsw_opt.load_optimal_index(index_path);
     hnsw_opt.data_ = X.data;
 
