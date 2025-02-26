@@ -1,8 +1,6 @@
 //
 // Created by mingyu on 25-2-15.
 //
-#ifndef INDEX_LABEL_H
-#define INDEX_LABEL_H
 
 #include "utils.h"
 #include "matrix.h"
@@ -55,9 +53,9 @@ public:
 
     std::pair<ANNS::IdxType, float> *
     contain_parallel_search(const float *query, unsigned K, unsigned nprobs, int nthread) {
-//        omp_set_num_threads(nthread);
+        omp_set_num_threads(nthread);
         auto results = new std::pair<ANNS::IdxType, float>[query_bitmap.size() * K];
-//#pragma omp parallel for schedule(dynamic, 1)
+#pragma omp parallel for schedule(dynamic, 1)
         for (int i = 0; i < query_bitmap.size(); i++) {
             auto bitmap = query_bitmap[i];
 
@@ -256,6 +254,3 @@ public:
     std::vector<std::pair<hnswlib::labeltype, hnswlib::labeltype> > index_range_list;
     float *data_;
 };
-
-
-#endif //INDEX_LABEL_H

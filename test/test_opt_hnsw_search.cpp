@@ -1,5 +1,5 @@
 //
-// Created by mingyu on 25-2-15.
+// Created by Mingyu YANG on 25-2-15.
 //
 #include <iostream>
 #include <fstream>
@@ -82,26 +82,6 @@ int main(int argc, char *argv[]) {
         std::cout << "- QPS: " << Q.n * 1000.0 / time_cost << std::endl;
         // calculate recall
         auto recall = calculate_recall(gt, results, Q.n, K);
-//        std::cerr<<gt[0].first<<" "<<gt[0].second<<" "<<results[0].first<<" "<<results[0].second<<" "<<sqr_dist(X.data + results[0].first * Q.d,Q.data, Q.d)<<std::endl;
-//        std::cerr<<gt[1].first<<" "<<gt[1].second<<" "<<results[1].first<<" "<<results[1].second<<std::endl;
-//        std::cerr<<gt[2].first<<" "<<gt[2].second<<" "<<results[2].first<<" "<<results[2].second<<std::endl;
-//        std::cerr<<gt[3].first<<" "<<gt[3].second<<" "<<results[3].first<<" "<<results[3].second<<std::endl;
-//        std::cerr<<gt[4].first<<" "<<gt[4].second<<" "<<results[4].first<<" "<<results[4].second<<std::endl;
-//        std::cerr<<gt[5].first<<" "<<gt[5].second<<" "<<results[5].first<<" "<<results[5].second<<std::endl;
-//        std::cerr<<gt[6].first<<" "<<gt[6].second<<" "<<results[6].first<<" "<<results[6].second<<std::endl;
-//        std::cerr<<gt[7].first<<" "<<gt[7].second<<" "<<results[7].first<<" "<<results[7].second<<std::endl;
-//        std::cerr<<gt[8].first<<" "<<gt[8].second<<" "<<results[8].first<<" "<<results[8].second<<std::endl;
-//        std::cerr<<gt[9].first<<" "<<gt[9].second<<" "<<results[9].first<<" "<<results[9].second<<std::endl;
-//        std::cerr<<gt[10].first<<" "<<gt[10].second<<" "<<results[10].first<<" "<<results[10].second<<" "<<sqr_dist(X.data + results[10].first * Q.d,Q.data +Q.d, Q.d)<<std::endl;
-//        std::cerr<<gt[11].first<<" "<<gt[11].second<<" "<<results[11].first<<" "<<results[11].second<<std::endl;
-//        std::cerr<<gt[12].first<<" "<<gt[12].second<<" "<<results[12].first<<" "<<results[12].second<<std::endl;
-//        std::cerr<<gt[13].first<<" "<<gt[13].second<<" "<<results[13].first<<" "<<results[13].second<<std::endl;
-//        std::cerr<<gt[14].first<<" "<<gt[14].second<<" "<<results[14].first<<" "<<results[14].second<<std::endl;
-//        std::cerr<<gt[15].first<<" "<<gt[15].second<<" "<<results[15].first<<" "<<results[15].second<<std::endl;
-//        std::cerr<<gt[16].first<<" "<<gt[16].second<<" "<<results[16].first<<" "<<results[16].second<<std::endl;
-//        std::cerr<<gt[17].first<<" "<<gt[17].second<<" "<<results[17].first<<" "<<results[17].second<<std::endl;
-//        std::cerr<<gt[18].first<<" "<<gt[18].second<<" "<<results[18].first<<" "<<results[18].second<<std::endl;
-//        std::cerr<<gt[19].first<<" "<<gt[19].second<<" "<<results[19].first<<" "<<results[19].second<<std::endl;
         std::cout << "- Recall: " << recall << "%" << std::endl;
         fout << recall << " " << Q.n * 1000.0 / time_cost << std::endl;
     }
