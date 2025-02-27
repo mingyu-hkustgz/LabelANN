@@ -201,7 +201,11 @@ namespace hnswlib {
 
 
         inline char *getDataByInternalId(tableint internal_id) const {
+#ifndef ID_COMPACT
             auto Label = getExternalLabel(internal_id);
+#else
+            auto Label = getExternalLabel(internal_id)>>32;
+#endif
             return (static_base_data_ + Label * data_size_);
         }
 
@@ -930,7 +934,11 @@ namespace hnswlib {
             }
 
             // lock all operations with element by label
+#ifndef ID_COMPACT
             std::unique_lock <std::mutex> lock_label(getLabelOpMutex(label));
+#else
+            std::unique_lock <std::mutex> lock_label(getLabelOpMutex(label>>32));
+#endif
             if (!replace_deleted) {
                 addPoint(data_point, label, -1);
                 return;
@@ -1129,7 +1137,11 @@ namespace hnswlib {
                 // Checking if the element with the same label already exist
                 // if so, updating it *instead* of creating a new element.
                 std::unique_lock <std::mutex> lock_table(label_lookup_lock);
+#ifndef ID_COMPACT
                 auto search = label_lookup_.find(label);
+#else
+                auto search = label_lookup_.find(label>>32);
+#endif
                 if (search != label_lookup_.end()) {
                     tableint existingInternalId = search->second;
                     if (allow_replace_deleted_) {
@@ -1153,7 +1165,11 @@ namespace hnswlib {
 
                 cur_c = cur_element_count;
                 cur_element_count++;
+#ifndef ID_COMPACT
                 label_lookup_[label] = cur_c;
+#else
+                label_lookup_[label>>32] = cur_c;
+#endif
             }
 
             std::unique_lock <std::mutex> lock_el(link_list_locks_[cur_c]);

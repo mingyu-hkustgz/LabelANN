@@ -27,7 +27,11 @@ public:
     }
 
     bool operator()(hnswlib::labeltype id) override {
+#ifdef ID_COMPACT
+        return _mm_popcnt_u64(query_bitmap & id) >= query_bits;
+#else
         return _mm_popcnt_u64(query_bitmap & label_bit_map_[id]) >= query_bits;
+#endif
     }
 };
 
@@ -41,7 +45,11 @@ public:
     }
 
     bool operator()(hnswlib::labeltype id) override {
+#ifdef ID_COMPACT
+        return query_bitmap & (id>>32);
+#else
         return query_bitmap & label_bit_map_[id];
+#endif
     }
 };
 
@@ -104,7 +112,11 @@ public:
                     unsigned back_tag = K;
                     while (!hnsw_result.empty()) {
                         back_tag--;
+#ifndef ID_COMPACT
                         results[i * K + back_tag].first = hnsw_result.top().second;
+#else
+                        results[i * K + back_tag].first = hnsw_result.top().second>>32;
+#endif
                         results[i * K + back_tag].second = hnsw_result.top().first;
                         hnsw_result.pop();
                     }
@@ -115,7 +127,11 @@ public:
                     unsigned back_tag = K;
                     while (!hnsw_result.empty()) {
                         back_tag--;
+#ifndef ID_COMPACT
                         results[i * K + back_tag].first = hnsw_result.top().second;
+#else
+                        results[i * K + back_tag].first = hnsw_result.top().second>>32;
+#endif
                         results[i * K + back_tag].second = hnsw_result.top().first;
                         hnsw_result.pop();
                     }
@@ -158,8 +174,10 @@ public:
 
     void load_base_label_bitmap(const char *filename) {
         load_bitmap(filename, label_bitmap, N);
+#ifndef ID_COMPACT
         ContainLabelFilter::label_bit_map_ = label_bitmap.data();
         InterLabelFilter::label_bit_map_ = label_bitmap.data();
+#endif
         std::cerr << "Base Label Load Finished" << std::endl;
     }
 
@@ -347,7 +365,11 @@ public:
             std::cout << "\r Processing:: " << (100.0 * cumulate_points) / indexed_points << "%" << std::flush;
 #pragma omp parallel for schedule(dynamic, 144)
             for (int i = 0; i < points_num; i++) {
+#ifndef ID_COMPACT
                 appr_alg->addPoint(X.data + (size_t) vec_list[i] * D, vec_list[i]);
+#else
+                appr_alg->addPoint(X.data + (size_t) vec_list[i] * D, (vec_list[i]<<32) + label_bitmap[vec_list[i]]);
+#endif
             }
             cumulate_points += points_num;
             appr_alg_list[bitmap] = appr_alg;
@@ -401,7 +423,6 @@ public:
     void save_elastic_index(char *filename) {
         std::ofstream fout(filename, std::ios::binary);
         unsigned map_size = bitmap_list.size();
-        std::cerr<<bitmap_list.size()<<std::endl;
         fout.write((char *) &map_size, sizeof(unsigned));
         for (auto u: bitmap_list) {
             unsigned size = u.second.size();
@@ -420,20 +441,16 @@ public:
         unsigned map_size, size;
         uint64_t cumulate_points = 0;
         fin.read((char *) &map_size, sizeof(unsigned));
-        std::cerr<<map_size<<std::endl;
         for (int i = 0; i < map_size; i++) {
             uint64_t bitmap, father;
             fin.read((char *) &bitmap, sizeof(uint64_t));
             fin.read((char *) &size, sizeof(unsigned));
-            std::cerr<<bitmap<<" "<<size<<std::endl;
             cumulate_points += size;
             bitmap_list[bitmap].resize(size);
             fin.read((char *) bitmap_list[bitmap].data(), sizeof(size_t) * (size_t) size);
             fin.read((char *) &father, sizeof(uint64_t));
             fa_[bitmap] = father;
-            std::cerr<<bitmap<<" "<<father<<std::endl;
             if (size >= INDEX_ELASIIC_BOUND && fa_[bitmap] == bitmap){
-                std::cerr<<"LOAD bitmap:: "<<bitmap<<std::endl;
                 load_single_static_index(appr_alg_list[bitmap], fin, bitmap);
             }
         }
@@ -447,7 +464,7 @@ public:
     uint64_t power_points = 0, indexed_points = 0, index_set_count = 0;
     std::vector<uint64_t> label_bitmap, query_bitmap, selected_bitmap;
     std::unordered_map<uint64_t, std::vector<uint64_t> > cover_set_;
-    std::unordered_map<uint64_t, std::vector<size_t> > bitmap_list;
+    std::unordered_map<uint64_t, std::vector<uint64_t> > bitmap_list;
     std::unordered_map<uint64_t, uint64_t> fa_;
     std::unordered_map<uint64_t, hnswlib::HierarchicalNSWStatic<float> *> appr_alg_list;
     float *data_;

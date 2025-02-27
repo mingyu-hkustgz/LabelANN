@@ -206,6 +206,9 @@ void load_bitmap(const char *filename, std::vector<uint64_t> &label_bitmap, unsi
         if(cumulate_points==points_num) break;
     }
     std::cerr << "Max bits:" << max_bits << std::endl;
+#ifdef ID_COMPACT
+    if(max_bits>32) std::cerr<<"EROOR ID_COMPACT WORKS ONLY FOR LESS THAN 32 BITS"<<std::endl;
+#endif
 }
 
 void load_float_data(char *filename, float *&data, unsigned &num,

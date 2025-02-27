@@ -66,7 +66,11 @@ int main(int argc, char *argv[]) {
     hnsw_elastic.load_elastic_index(index_path);
 
     std::vector efSearch{1, 2, 4, 8, 16, 32, 50, 64, 128, 150, 256, 300};
+#ifndef ID_COMPACT
     std::ofstream fout("./results/sift/sift-hnsw-elastic.log");
+#else
+    std::ofstream fout("./results/sift/sift-hnsw-elastic-compact.log");
+#endif
     for (auto ef: efSearch) {
         // search
         if (K > ef) ef = K;
