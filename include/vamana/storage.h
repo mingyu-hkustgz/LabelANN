@@ -8,6 +8,7 @@
 #include <xmmintrin.h>
 #include <immintrin.h>
 #include "config.h"
+#include "omp.h"
 #include "distance.h"
 
 namespace ANNS {

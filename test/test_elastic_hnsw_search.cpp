@@ -22,16 +22,21 @@ int main(int argc, char *argv[]) {
 
     int ind;
     int iarg = 0, K = 10, num_thread = 1;
+    float elastic_factor = 0.5;
     opterr = 1; //getopt error message (off: 0)
 
     char dataset[256] = "";
     char source[256] = "";
+    char label[256] = "";
     char data_path[256] = "";
     char index_path[256] = "";
     char query_path[256] = "";
     char ground_path[256] = "";
+    char base_label_path[256] = "";
+    char query_label_path[256] = "";
+    char result_path[256] = "";
     while (iarg != -1) {
-        iarg = getopt_long(argc, argv, "d:s:t:k:", longopts, &ind);
+        iarg = getopt_long(argc, argv, "d:s:t:k:l:e:", longopts, &ind);
         switch (iarg) {
             case 'd':
                 if (optarg) {
@@ -49,27 +54,40 @@ int main(int argc, char *argv[]) {
             case 'k':
                 if (optarg) K = atoi(optarg);
                 break;
+            case 'l':
+                if (optarg) {
+                    strcpy(label, optarg);
+                }
+                break;
+            case 'e':
+                if (optarg) elastic_factor = atof(optarg);
+                break;
         }
     }
     sprintf(query_path, "%s%s_query.bin", source, dataset);
     sprintf(data_path, "%s%s_base.bin", source, dataset);
-    sprintf(index_path, "%s%s_elastic.hnsw", source, dataset);
-    sprintf(ground_path, "%s%s_gt_3_labels_zipf_containment.bin", source, dataset);
+    sprintf(index_path, "%s%s_elastic_%.2f_compact.hnsw", source, dataset, elastic_factor);
+    sprintf(ground_path, "%s%s_gt_%s_containment.bin", source, dataset, label);
+    sprintf(base_label_path, "%s%s_base_%s.txt", source, dataset, label);
+    sprintf(query_label_path, "%s%s_query_%s_containment.txt", source, dataset, label);
     Matrix<float> X(data_path);
     Matrix<float> Q(query_path);
     auto gt = new std::pair<ANNS::IdxType, float>[Q.n * K];
     load_gt_file(ground_path, gt, Q.n, K);
     hnswlib::HierarchicalNSWStatic<float>::static_base_data_ = (char *) X.data;
-    IndexLabelElastic hnsw_elastic(X.n, X.d);
-    hnsw_elastic.load_base_label_bitmap("./DATA/sift/sift_base_3_labels_zipf.txt");
-    hnsw_elastic.load_query_label_bitmap("./DATA/sift/sift_query_3_labels_zipf_containment.txt", Q.n);
+    IndexLabelElastic hnsw_elastic(X.n, X.d, X.data);
+    hnsw_elastic.set_elastic_factor(elastic_factor);
+    hnsw_elastic.load_base_label_bitmap(base_label_path);
+    hnsw_elastic.load_query_label_bitmap(query_label_path, Q.n);
     hnsw_elastic.load_elastic_index(index_path);
 
     std::vector efSearch{1, 2, 4, 8, 16, 32, 50, 64, 128, 150, 256, 300};
 #ifndef ID_COMPACT
-    std::ofstream fout("./results/sift/sift-hnsw-elastic.log");
+    sprintf(result_path, "./results/%s/%s-hnsw-elastic-%.2f.log", dataset, dataset, elastic_factor);
+    std::ofstream fout(result_path);
 #else
-    std::ofstream fout("./results/sift/sift-hnsw-elastic-compact.log");
+    sprintf(result_path, "./results/%s/%s-hnsw-elastic-%.2f-compact.log", dataset, dataset, elastic_factor);
+    std::ofstream fout(result_path);
 #endif
     for (auto ef: efSearch) {
         // search

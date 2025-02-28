@@ -64,6 +64,11 @@ public:
         N = num;
         D = dim;
     }
+    IndexLabelElastic(unsigned num, unsigned dim, float *base_data) {
+        N = num;
+        D = dim;
+        data_ = base_data;
+    }
 
     void set_elastic_factor(float factor) {
         elastic_factor_ = factor;
@@ -164,12 +169,11 @@ public:
             {
                 check_tag++;
                 if (check_tag % report == 0) {
-                    std::cerr << "Processing - " << check_tag << " / " << N << std::endl;
+                    std::cout << "Processing - " << check_tag << " / " << N << std::endl;
                 }
             }
         }
         appr_alg_list[0] = appr_alg;
-        data_ = X.data;
     }
 
     void load_base_label_bitmap(const char *filename) {
@@ -178,12 +182,12 @@ public:
         ContainLabelFilter::label_bit_map_ = label_bitmap.data();
         InterLabelFilter::label_bit_map_ = label_bitmap.data();
 #endif
-        std::cerr << "Base Label Load Finished" << std::endl;
+        std::cout << "Base Label Load Finished" << std::endl;
     }
 
     void load_query_label_bitmap(const char *filename, unsigned query_num) {
         load_bitmap(filename, query_bitmap, query_num);
-        std::cerr << "Query Label Load Finished" << std::endl;
+        std::cout << "Query Label Load Finished" << std::endl;
     }
 
 
@@ -216,7 +220,7 @@ public:
             }
             power_points += (1 << bit_size);
         }
-        std::cerr << "Power points " << power_points << std::endl;
+        std::cout << "Power points " << power_points << std::endl;
     }
 
     void preprocess_cover_relationship() {
@@ -246,13 +250,6 @@ public:
                     cover_set_[point_bitmap].push_back(item.first);
             }
         }
-//        for(const auto& check_cover_set:cover_set_){
-//            std::cerr<<"dominate set:: "<<check_cover_set.first<<" size:: "<<bitmap_list[check_cover_set.first].size()<<std::endl;
-//            for(auto check_item:check_cover_set.second){
-//                std::cerr<<check_item<<" -- ";
-//            }
-//            std::cerr<<std::endl;
-//        }
 
     }
 
@@ -283,18 +280,15 @@ public:
             auto benefit = top_set.first;
             queue.pop();
             if (std::abs(set_benefit[bitmap] - benefit) < 1e-6) {
-//                std::cerr<<"SELECT:: "<<bitmap<<" "<<benefit<<std::endl;
                 selected_bitmap.push_back(bitmap);
                 total_cost += bitmap_list[bitmap].size();
                 set_check[bitmap] = true;
                 set_covered_count += cover_set_[bitmap].size();
                 for (auto element: cover_set_[bitmap]) {
                     if (element_check[element]) continue;
-//                    std::cerr<<element<<" removed element"<<std::endl;
                     element_check[element] = true;
                     for (auto influence_set: element_to_sets[element]) {
                         if (set_check[influence_set]) continue;
-//                        std::cerr<<influence_set<<" removed set"<<std::endl;
                         set_cover_num[influence_set] -= (double) bitmap_list[element].size();
                         set_benefit[influence_set] =
                                 set_cover_num[influence_set] / (double) bitmap_list[influence_set].size();
@@ -302,16 +296,10 @@ public:
                     }
                 }
 
-//                for(auto check_benefit:set_benefit){
-//                    std::cerr<<check_benefit.first<<" "<<check_benefit.second<<std::endl;
-//                }
-
             } else {
                 queue.emplace(set_benefit[top_set.second], top_set.second);
             }
         }
-//        for (auto u: selected_bitmap) std::cerr << u << endl;
-//        std::cerr << std::endl;
     }
 
     void find_cover_father() {
@@ -327,20 +315,6 @@ public:
                 }
             }
         }
-//        for (auto item: selected_bitmap) {
-//            auto print_item = item;
-//            auto print_fa = fa_[item];
-//            for(int i=0;i<4;i++){
-//                    std::cerr << (print_item & 1);
-//                    print_item >>= 1;
-//                }
-//            std::cerr << " fa-> ";
-//            for(int i=0;i<4;i++){
-//                std::cerr << (print_fa & 1);
-//                print_fa >>= 1;
-//            }
-//            std::cerr << std::endl;
-//        }
     }
 
 
@@ -439,7 +413,7 @@ public:
     void load_elastic_index(char *filename) {
         std::ifstream fin(filename, std::ios::binary);
         unsigned map_size, size;
-        uint64_t cumulate_points = 0;
+        uint64_t cumulate_points = 0, index_points = 0;
         fin.read((char *) &map_size, sizeof(unsigned));
         for (int i = 0; i < map_size; i++) {
             uint64_t bitmap, father;
@@ -452,10 +426,12 @@ public:
             fa_[bitmap] = father;
             if (size >= INDEX_ELASIIC_BOUND && fa_[bitmap] == bitmap){
                 load_single_static_index(appr_alg_list[bitmap], fin, bitmap);
+                index_points += size;
             }
         }
         power_points = cumulate_points;
-        std::cerr << "All Points:: " << cumulate_points << std::endl;
+        std::cout << "All Points:: " << cumulate_points << std::endl;
+        std::cout << "All Points:: " << index_points << std::endl;
     }
 
 
