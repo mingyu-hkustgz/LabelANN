@@ -26,4 +26,4 @@ endif()
 add_definitions(-std=c++17 -Ofast -march=core-avx2 -mavx512f -fpic -fopenmp -ftree-vectorize -fexceptions)
 
 add_subdirectory(test)
-add_subdirectory(tool)
+add_subdirectory(tools)

@@ -199,7 +199,7 @@ void load_bitmap(const char *filename, std::vector<uint64_t> &label_bitmap, unsi
             tokens.push_back(token);
         }
         for (const auto &t: tokens) {
-            bitmap |= (1 << (std::atoi(t.c_str()) - 1));
+            bitmap |= (1ull << (std::atoi(t.c_str()) - 1));
         }
         label_bitmap.push_back(bitmap);
         if (_mm_popcnt_u64(bitmap) > max_bits) max_bits = _mm_popcnt_u64(bitmap);
@@ -303,23 +303,6 @@ int InsertIntoPool(Neighbor *addr, unsigned K, Neighbor nn) {
     return right;
 }
 
-__attribute__((always_inline))
-std::vector<std::pair<float, unsigned> >
-merge_sort(std::vector<std::pair<float, unsigned> > &left, std::vector<std::pair<float, unsigned> > &right,
-           unsigned K) {
-    std::vector<std::pair<float, unsigned> > ans(K);
-    unsigned L = 0, R = 0, cur = 0;
-    while (cur < K) {
-        if (L < left.size() && R < right.size()) {
-            if (left[L].first < right[R].first) ans[cur] = left[L], L++;
-            else ans[cur] = right[R], R++;
-        } else if (L < left.size()) ans[cur] = left[L], L++;
-        else if (R < right.size()) ans[cur] = right[R], R++;
-        else break;
-        cur++;
-    }
-    return ans;
-}
 
 
 

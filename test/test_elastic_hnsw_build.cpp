@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
     };
 
     int ind;
-    int iarg = 0, K = 10, num_thread = 1;
+    int iarg = 0;
     float elastic_factor = 0.5;
     opterr = 1; //getopt error message (off: 0)
 

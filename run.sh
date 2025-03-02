@@ -1,9 +1,7 @@
-mkdir build
-cd build
-cmake ..
-make -j 48
+source set.sh
 
-cd ..
-./build/test/test_hnsw_build -d sift -s ./DATA/sift/
+bash mkdir.sh
 
-./build/test/test_hnsw_search -d sift -s ./DATA/sift/
+bash ./script/pre_process.sh
+
+bash ./script/test_all.sh

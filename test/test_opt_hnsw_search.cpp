@@ -26,12 +26,16 @@ int main(int argc, char *argv[]) {
 
     char dataset[256] = "";
     char source[256] = "";
+    char label[256] = "";
     char data_path[256] = "";
     char index_path[256] = "";
     char query_path[256] = "";
     char ground_path[256] = "";
+    char base_label_path[256] = "";
+    char query_label_path[256] = "";
+    char result_path[256] = "";
     while (iarg != -1) {
-        iarg = getopt_long(argc, argv, "d:s:t:k:", longopts, &ind);
+        iarg = getopt_long(argc, argv, "d:s:t:k:l:e:", longopts, &ind);
         switch (iarg) {
             case 'd':
                 if (optarg) {
@@ -49,25 +53,32 @@ int main(int argc, char *argv[]) {
             case 'k':
                 if (optarg) K = atoi(optarg);
                 break;
+            case 'l':
+                if (optarg) {
+                    strcpy(label, optarg);
+                }
+                break;
         }
     }
     sprintf(query_path, "%s%s_query.bin", source, dataset);
     sprintf(data_path, "%s%s_base.bin", source, dataset);
     sprintf(index_path, "%s%s_opt.hnsw", source, dataset);
-    sprintf(ground_path, "%s%s_gt_12_labels_zipf_containment.bin", source, dataset);
+    sprintf(ground_path, "%s%s_gt_%s_containment.bin", source, dataset, label);
+    sprintf(base_label_path, "%s%s_base_%s.txt", source, dataset, label);
+    sprintf(query_label_path, "%s%s_query_%s_containment.txt", source, dataset, label);
     Matrix<float> X(data_path);
     Matrix<float> Q(query_path);
     auto gt = new std::pair<ANNS::IdxType, float>[Q.n * K];
     load_gt_file(ground_path, gt, Q.n, K);
     hnswlib::HierarchicalNSWStatic<float>::static_base_data_ = (char *) X.data;
-    IndexLabelOpt hnsw_opt(X.n, X.d);
-    hnsw_opt.load_base_label_bitmap("./DATA/sift/sift_base_12_labels_zipf.txt");
-    hnsw_opt.load_query_label_bitmap("./DATA/sift/sift_query_12_labels_zipf_containment.txt", Q.n);
+    IndexLabelOpt hnsw_opt(X.n, X.d, X.data);
+    hnsw_opt.load_base_label_bitmap(base_label_path);
+    hnsw_opt.load_query_label_bitmap(query_label_path, Q.n);
     hnsw_opt.load_optimal_index(index_path);
-    hnsw_opt.data_ = X.data;
 
     std::vector efSearch{1, 2, 4, 8, 16, 32, 50, 64, 128, 150, 256, 300};
-    std::ofstream fout("./results/sift/sift-hnsw-opt.log");
+    sprintf(result_path, "./results@%d/%s/%s-hnsw-%s-opt.log", K, dataset, dataset, label);
+    std::ofstream fout(result_path);
     for (auto ef: efSearch) {
         // search
         if (K > ef) ef = K;

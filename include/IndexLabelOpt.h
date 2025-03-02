@@ -24,6 +24,12 @@ public:
         D = dim;
     }
 
+    IndexLabelOpt(unsigned num, unsigned dim, float *base_data) {
+        N = num;
+        D = dim;
+        data_ = base_data;
+    }
+
     ResultQueue bruteforce_range_search(std::vector<size_t> &id, const float *query, unsigned K) {
         ResultQueue res;
         for (auto u:id) {
@@ -102,7 +108,6 @@ public:
             }
         }
         appr_alg_list[0] = appr_alg;
-        data_ = X.data;
     }
 
     void load_base_label_bitmap(const char *filename) {
@@ -168,7 +173,6 @@ public:
             cumulate_points += points_num;
             appr_alg_list[u.first] = appr_alg;
         }
-        data_ = X.data;
     }
 
     void save_single_static_index(hnswlib::HierarchicalNSWStatic<float> *&appr_alg, std::ofstream &fout) {

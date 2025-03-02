@@ -83,10 +83,11 @@ int main(int argc, char *argv[]) {
 
     std::vector efSearch{1, 2, 4, 8, 16, 32, 50, 64, 128, 150, 256, 300};
 #ifndef ID_COMPACT
-    sprintf(result_path, "./results/%s/%s-hnsw-elastic-%.2f.log", dataset, dataset, elastic_factor);
+    sprintf(result_path, "./results@%d/%s/%s-hnsw-%s-elastic-%.2f.log", K, dataset, dataset, label, elastic_factor);
     std::ofstream fout(result_path);
 #else
-    sprintf(result_path, "./results/%s/%s-hnsw-elastic-%.2f-compact.log", dataset, dataset, elastic_factor);
+    sprintf(result_path, "./results@%d/%s/%s-hnsw-%s-elastic-%.2f-compact.log", K, dataset, dataset, label,
+            elastic_factor);
     std::ofstream fout(result_path);
 #endif
     for (auto ef: efSearch) {
@@ -94,7 +95,7 @@ int main(int argc, char *argv[]) {
         if (K > ef) ef = K;
         std::cout << "Start querying ..." << std::endl;
         auto start_time = std::chrono::high_resolution_clock::now();
-        auto results = hnsw_elastic.contain_parallel_search(Q.data, K, ef, 1);
+        auto results = hnsw_elastic.contain_parallel_search(Q.data, K, ef, num_thread);
         auto time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(
                 std::chrono::high_resolution_clock::now() - start_time).count();
 
