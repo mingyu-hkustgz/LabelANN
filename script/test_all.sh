@@ -4,10 +4,20 @@ source set.sh
 for data in "${datasets[@]}"; do
   if [ $data == "sift" ]; then
       N=1000000
+  elif [ $data == "gist" ]; then
+      N=1000000
+  elif [ $data == "OpenAI-1536" ]; then
+      N=9990000
+  elif [ $data == "OpenAI-3072" ]; then
+      N=9990000
+  elif [ $data == "msmarc" ]; then
+      N=1000000
+  elif [ $data == "paper" ]; then
+      N=2029997
   elif [ $data == "deep100M" ]; then
       N=100000000
   fi
-  for L in {12,32};do
+  for L in {4,8,12,24,32};do
 
   log_file="./results/time-log/${data}/HNSW-Elastic-Index-time.log"
   start_time=$(date +%s)

@@ -30,8 +30,9 @@ int main(int argc, char *argv[]) {
     char data_path[256] = "";
     char index_path[256] = "";
     char label_path[256] = "";
+    char file_type[256] = "fvecs";
     while (iarg != -1) {
-        iarg = getopt_long(argc, argv, "d:s:l:", longopts, &ind);
+        iarg = getopt_long(argc, argv, "d:s:l:f:", longopts, &ind);
         switch (iarg) {
             case 'd':
                 if (optarg) {
@@ -48,9 +49,14 @@ int main(int argc, char *argv[]) {
                     strcpy(label, optarg);
                 }
                 break;
+            case 'f':
+                if (optarg) {
+                    strcpy(file_type, optarg);
+                }
+                break;
         }
     }
-    sprintf(data_path, "%s%s_base.bin", source, dataset);
+    sprintf(data_path, "%s%s_base.%s", source, dataset, file_type);
     sprintf(index_path, "%s%s_opt.hnsw", source, dataset);
     sprintf(label_path, "%s%s_base_%s.txt", source, dataset, label);
     Matrix<float> X(data_path);

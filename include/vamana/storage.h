@@ -10,6 +10,7 @@
 #include "config.h"
 #include "omp.h"
 #include "distance.h"
+#include "utils.h"
 
 namespace ANNS {
 
@@ -83,14 +84,32 @@ namespace ANNS {
             if (!file.is_open())
                 throw std::runtime_error("Failed to open file: " + bin_file);
 
-            // read vector data
-            file.seekg(0, std::ios::beg);
-            file.read((char *) &num_points, sizeof(IdxType));
-            file.read((char *) &dim, sizeof(IdxType));
-            num_points = std::min(num_points, max_num_points);
-            vecs = static_cast<T *>(std::aligned_alloc(32, num_points * dim * sizeof(T)));
-            file.read((char *) vecs, num_points * dim * sizeof(T));
-            file.close();
+            if (endsWith(bin_file,"bin") || endsWith(bin_file,"fbin")) {
+                // read vector data
+                file.seekg(0, std::ios::beg);
+                file.read((char *) &num_points, sizeof(IdxType));
+                file.read((char *) &dim, sizeof(IdxType));
+                num_points = std::min(num_points, max_num_points);
+                vecs = static_cast<T *>(std::aligned_alloc(32, num_points * dim * sizeof(T)));
+                file.read((char *) vecs, num_points * dim * sizeof(T));
+                file.close();
+            }else{
+                file.seekg(0, std::ios::beg);
+                file.read((char *) &dim, 4);
+                file.seekg(0, std::ios::end);
+                std::ios::pos_type ss = file.tellg();
+                size_t fsize = (size_t) ss;
+                num_points = (size_t) (fsize / (sizeof(T) * dim + 4));
+                num_points = std::min(num_points, max_num_points);
+                vecs = static_cast<T *>(std::aligned_alloc(32, num_points * dim * sizeof(T)));
+                file.seekg(0, std::ios::beg);
+                for (size_t i = 0; i < num_points; i++) {
+                    file.seekg(4, std::ios::cur);
+                    file.read((char *) (vecs + i * dim), dim * sizeof(T));
+                }
+                file.close();
+            }
+
 
             // for prefetch
             prefetch_byte_num = dim * sizeof(T);

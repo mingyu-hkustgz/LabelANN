@@ -34,8 +34,9 @@ int main(int argc, char *argv[]) {
     char base_label_path[256] = "";
     char query_label_path[256] = "";
     char result_path[256] = "";
+    char file_type[256] = "fvecs";
     while (iarg != -1) {
-        iarg = getopt_long(argc, argv, "d:s:t:k:l:e:", longopts, &ind);
+        iarg = getopt_long(argc, argv, "d:s:t:k:l:e:f:", longopts, &ind);
         switch (iarg) {
             case 'd':
                 if (optarg) {
@@ -58,10 +59,15 @@ int main(int argc, char *argv[]) {
                     strcpy(label, optarg);
                 }
                 break;
+            case 'f':
+                if (optarg) {
+                    strcpy(file_type, optarg);
+                }
+                break;
         }
     }
-    sprintf(query_path, "%s%s_query.bin", source, dataset);
-    sprintf(data_path, "%s%s_base.bin", source, dataset);
+    sprintf(query_path, "%s%s_query.%s", source, dataset, file_type);
+    sprintf(data_path, "%s%s_base.%s", source, dataset, file_type);
     sprintf(index_path, "%s%s_opt.hnsw", source, dataset);
     sprintf(ground_path, "%s%s_gt_%s_containment.bin", source, dataset, label);
     sprintf(base_label_path, "%s%s_base_%s.txt", source, dataset, label);

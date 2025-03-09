@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
     char data_path[256] = "";
     char index_path[256] = "";
     char label_path[256] = "";
-    char file_type[256]= "fvecs";
+    char file_type[256] = "fvecs";
     while (iarg != -1) {
         iarg = getopt_long(argc, argv, "d:s:l:e:f:", longopts, &ind);
         switch (iarg) {

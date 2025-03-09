@@ -34,7 +34,6 @@ public:
 #endif
     }
 };
-
 class InterLabelFilter : public hnswlib::BaseFilterFunctor {
 public:
     uint64_t query_bitmap = 0;
@@ -64,6 +63,7 @@ public:
         N = num;
         D = dim;
     }
+
     IndexLabelElastic(unsigned num, unsigned dim, float *base_data) {
         N = num;
         D = dim;
@@ -73,7 +73,6 @@ public:
     void set_elastic_factor(float factor) {
         elastic_factor_ = factor;
     }
-
 
     ResultQueue bruteforce_range_search(std::vector<size_t> &id, const float *query, unsigned K) {
         ResultQueue res;
@@ -87,19 +86,6 @@ public:
             }
         }
         return res;
-    }
-
-    std::priority_queue<std::pair<float, hnswlib::labeltype> >
-    naive_search(const float *query, unsigned K, unsigned nprobs) {
-        auto appr_alg = appr_alg_list[0];
-        return appr_alg->searchKnn(query, K, nprobs);
-    }
-
-
-    std::priority_queue<std::pair<float, hnswlib::labeltype> >
-    contain_search(const float *query, unsigned K, unsigned nprobs, uint64_t bitmap) {
-        auto appr_alg = appr_alg_list[bitmap];
-        return appr_alg->searchKnn(query, K, nprobs);
     }
 
     std::pair<ANNS::IdxType, float> *
@@ -155,27 +141,6 @@ public:
         return results;
     }
 
-
-    void build_naive_index(Matrix<float> &X) {
-        std::cout << "build index" << std::endl;
-        unsigned check_tag = 0, report = 50000;
-        auto l2space = new hnswlib::L2Space(D);
-        auto appr_alg = new hnswlib::HierarchicalNSWStatic<float>(l2space, N, HNSW_ELASTIC_M,
-                                                                  HNSW_ELASIIC_efConstruction);
-#pragma omp parallel for schedule(dynamic, 144)
-        for (int i = 0; i < N; i++) {
-            appr_alg->addPoint(X.data + i * D, i);
-#pragma omp critical
-            {
-                check_tag++;
-                if (check_tag % report == 0) {
-                    std::cout << "Processing - " << check_tag << " / " << N << std::endl;
-                }
-            }
-        }
-        appr_alg_list[0] = appr_alg;
-    }
-
     void load_base_label_bitmap(const char *filename) {
         load_bitmap(filename, label_bitmap, N);
 #ifndef ID_COMPACT
@@ -189,7 +154,6 @@ public:
         load_bitmap(filename, query_bitmap, query_num);
         std::cout << "Query Label Load Finished" << std::endl;
     }
-
 
     void preprocess_optimal_vector() {
         power_points = 0;
@@ -224,6 +188,8 @@ public:
     }
 
     void preprocess_cover_relationship() {
+        cover_set_.clear();
+        index_set_count = 0;
         for (auto &item: bitmap_list) {
             if (item.second.size() < INDEX_ELASIIC_BOUND) continue;
             index_set_count++;
@@ -253,7 +219,7 @@ public:
 
     }
 
-    void best_fit_schedule() {
+    uint64_t best_fit_schedule() {
         uint64_t total_cost = 0;
         uint64_t set_covered_count = 0;
         std::unordered_map<uint64_t, bool> set_check, element_check;
@@ -295,11 +261,12 @@ public:
                         set_benefit[influence_set] += 1.00/(double)bitmap_list[influence_set].size();
                     }
                 }
-
             } else {
                 queue.emplace(set_benefit[top_set.second], top_set.second);
             }
         }
+        std::cout<<"Total Cost: "<<total_cost<<" with Elastic Factor: "<<elastic_factor_<<std::endl;
+        return total_cost;
     }
 
     void find_cover_father() {
@@ -317,11 +284,39 @@ public:
         }
     }
 
+    void binary_search_elastic_factor(uint64_t cost_bound){
+        std::cout<<"Begin Binary Search with Cost Bound "<<cost_bound<<std::endl;
+        float lower_bound= 0.00, upper_bound = 1.0, final_elastic = 0.0;
+        std::vector<uint64_t> final_ans;
+        while(lower_bound + 1e-3 < upper_bound){
+            float mid = (lower_bound + upper_bound)/2.0;
+            std::cout<<"Current Elastic Factor "<<elastic_factor_<<std::endl;
+            elastic_factor_ = mid;
+            selected_bitmap.clear();
+            preprocess_cover_relationship();
+            uint64_t cost = best_fit_schedule();
+            if(cost < cost_bound){
+                lower_bound = mid;
+                final_elastic = mid;
+                final_ans = selected_bitmap;
+            }
+            else{
+                upper_bound = mid;
+            }
+        }
+        selected_bitmap = final_ans;
+        elastic_factor_ = final_elastic;
+    }
+
 
     void build_elastic_index(Matrix<float> &X) {
         preprocess_optimal_vector();
-        preprocess_cover_relationship();
-        best_fit_schedule();
+        if(elastic_factor_ < 1.0){
+            preprocess_cover_relationship();
+            best_fit_schedule();
+        }
+        else
+            binary_search_elastic_factor((uint64_t) (N * (double)elastic_factor_));
         find_cover_father();
         uint64_t cumulate_points = 0;
         std::cout << "All Points:: " << indexed_points << std::endl;
