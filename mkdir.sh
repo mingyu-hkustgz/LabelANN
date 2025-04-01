@@ -22,7 +22,6 @@ for dataset in "${datasets[@]}";
 do
   echo $dataset
   mkdir ./DATA/${dataset}
-  mkdir ./results@1/${dataset}
   mkdir ./results@10/${dataset}
   mkdir ./results/time-log/${dataset}
   mkdir ./results/space-log/${dataset}

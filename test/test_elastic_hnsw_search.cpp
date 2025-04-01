@@ -72,7 +72,12 @@ int main(int argc, char *argv[]) {
     }
     sprintf(query_path, "%s%s_query.%s", source, dataset, file_type);
     sprintf(data_path, "%s%s_base.%s", source, dataset, file_type);
+#ifndef ID_COMPACT
+    sprintf(index_path, "%s%s_elastic_%.2f.hnsw", source, dataset, elastic_factor);
+#else
     sprintf(index_path, "%s%s_elastic_%.2f_compact.hnsw", source, dataset, elastic_factor);
+#endif
+
     sprintf(ground_path, "%s%s_gt_%s_containment.bin", source, dataset, label);
     sprintf(base_label_path, "%s%s_base_%s.txt", source, dataset, label);
     sprintf(query_label_path, "%s%s_query_%s_containment.txt", source, dataset, label);
@@ -87,7 +92,7 @@ int main(int argc, char *argv[]) {
     hnsw_elastic.load_query_label_bitmap(query_label_path, Q.n);
     hnsw_elastic.load_elastic_index(index_path);
 
-    std::vector efSearch{1, 2, 4, 8, 16, 32, 50, 64, 128, 150, 256, 300};
+    std::vector efSearch{10, 16, 32, 64, 128, 256, 275, 512, 800, 900, 1024};
 #ifndef ID_COMPACT
     sprintf(result_path, "./results@%d/%s/%s-hnsw-%s-elastic-%.2f.log", K, dataset, dataset, label, elastic_factor);
     std::ofstream fout(result_path);
@@ -112,6 +117,7 @@ int main(int argc, char *argv[]) {
         auto recall = calculate_recall(gt, results, Q.n, K);
         std::cout << "- Recall: " << recall << "%" << std::endl;
         fout << recall << " " << Q.n * 1000.0 / time_cost << std::endl;
+        if(recall > 99.9) break;
     }
 
     return 0;

@@ -4,4 +4,6 @@ bash mkdir.sh
 
 bash ./script/pre_process.sh
 
-bash ./script/test_all.sh
+#bash ./script/test_elastic_build_search.sh
+
+bash ./script/test_auto_config.sh

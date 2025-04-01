@@ -11,6 +11,9 @@ for data in "${datasets[@]}"; do
   elif [ $data == "OpenAI-3072" ]; then
       N=999000
       QN=1000
+  elif [ $data == "yt1m" ]; then
+      N=999000
+      QN=1000
   elif [ $data == "msmarc-small" ]; then
       N=1000000
       QN=1000
@@ -21,7 +24,7 @@ for data in "${datasets[@]}"; do
       N=100000000
       QN=1000
   fi
-  for L in {4,8,12,24,32};do
+  for L in 4;do
 
   ./build/tools/generate_base_labels \
       --num_labels $L --num_points $N --distribution_type zipf \

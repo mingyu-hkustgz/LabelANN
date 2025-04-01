@@ -10,6 +10,8 @@ for data in "${datasets[@]}"; do
       N=9990000
   elif [ $data == "OpenAI-3072" ]; then
       N=9990000
+  elif [ $data == "yt1m" ]; then
+      N=999000
   elif [ $data == "msmarc" ]; then
       N=1000000
   elif [ $data == "paper" ]; then

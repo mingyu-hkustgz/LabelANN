@@ -82,7 +82,7 @@ int main(int argc, char *argv[]) {
     hnsw_opt.load_query_label_bitmap(query_label_path, Q.n);
     hnsw_opt.load_optimal_index(index_path);
 
-    std::vector efSearch{1, 2, 4, 8, 16, 32, 50, 64, 128, 150, 256, 300};
+    std::vector efSearch{10, 16, 32, 64, 128, 256, 275, 512, 800, 900, 1024};
     sprintf(result_path, "./results@%d/%s/%s-hnsw-%s-opt.log", K, dataset, dataset, label);
     std::ofstream fout(result_path);
     for (auto ef: efSearch) {
@@ -101,6 +101,7 @@ int main(int argc, char *argv[]) {
         auto recall = calculate_recall(gt, results, Q.n, K);
         std::cout << "- Recall: " << recall << "%" << std::endl;
         fout << recall << " " << Q.n * 1000.0 / time_cost << std::endl;
+        if(recall > 99.9) break;
     }
 
     return 0;
