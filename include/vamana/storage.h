@@ -90,7 +90,7 @@ namespace ANNS {
                 file.read((char *) &num_points, sizeof(IdxType));
                 file.read((char *) &dim, sizeof(IdxType));
                 num_points = std::min(num_points, max_num_points);
-                vecs = static_cast<T *>(std::aligned_alloc(32, num_points * dim * sizeof(T)));
+                vecs = static_cast<T *>(std::aligned_alloc(32, (size_t)num_points * dim * sizeof(T)));
                 file.read((char *) vecs, num_points * dim * sizeof(T));
                 file.close();
             }else{
@@ -101,7 +101,7 @@ namespace ANNS {
                 size_t fsize = (size_t) ss;
                 num_points = (size_t) (fsize / (sizeof(T) * dim + 4));
                 num_points = std::min(num_points, max_num_points);
-                vecs = static_cast<T *>(std::aligned_alloc(32, num_points * dim * sizeof(T)));
+                vecs = static_cast<T *>(std::aligned_alloc(32, (size_t)num_points * dim * sizeof(T)));
                 file.seekg(0, std::ios::beg);
                 for (size_t i = 0; i < num_points; i++) {
                     file.seekg(4, std::ios::cur);
@@ -201,7 +201,7 @@ namespace ANNS {
         // get data
         std::vector<LabelType> *get_offseted_label_sets(IdxType idx) { return label_sets + idx; }
 
-        char *get_vector(IdxType idx) { return reinterpret_cast<char *>(vecs + idx * dim); }
+        char *get_vector(IdxType idx) { return reinterpret_cast<char *>(vecs + (size_t)idx * dim); }
 
         std::vector<LabelType> &get_label_set(IdxType idx) { return label_sets[idx]; }
 

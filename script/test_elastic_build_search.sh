@@ -19,7 +19,7 @@ for data in "${datasets[@]}"; do
   elif [ $data == "deep100M" ]; then
       N=100000000
   fi
-  for L in {4,8,12,24,32};do
+  for L in {8,12,24,32};do
 
   log_file="./results/time-log/${data}/HNSW-Elastic-Index-time.log"
   start_time=$(date +%s)
