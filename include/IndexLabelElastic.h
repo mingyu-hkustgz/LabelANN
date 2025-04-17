@@ -236,7 +236,10 @@ public:
             benefit = (double) cover_num / (double) item.second.size();
             set_benefit[item.first] = benefit + 1.00/(double)item.second.size();
             set_cover_num[item.first] = cover_num;
-            if (item.first == 0) set_benefit[item.first] = MAXFLOAT;
+            if (item.first == 0){
+                set_benefit[item.first] = MAXFLOAT;
+                benefit = MAXFLOAT;
+            }
             queue.emplace(benefit, item.first);
         }
 
