@@ -1,6 +1,4 @@
-datasets=("sift" "paper")
-labelsets=("poisson")
-#labelsets=("uniform" "poisson" "multi_normial")
+source set.sh
 
 for data in "${datasets[@]}"; do
   if [ $data == "sift" ]; then
