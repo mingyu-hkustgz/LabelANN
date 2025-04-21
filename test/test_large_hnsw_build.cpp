@@ -5,7 +5,7 @@
 #include <fstream>
 #include <cstdio>
 #include <getopt.h>
-#include "IndexLabelElastic.h"
+#include "IndexLabelLarge.h"
 
 using namespace std;
 
@@ -90,21 +90,14 @@ int main(int argc, char *argv[]) {
     hnsw_elastic.set_elastic_factor(elastic_factor);
     hnsw_elastic.load_base_label_bitmap(base_label_path);
     hnsw_elastic.load_query_label_bitmap(query_label_path, Q.n);
-    hnsw_elastic.load_elastic_index(index_path);
+    hnsw_elastic.build_elastic_index(X);
 
     std::vector efSearch{10, 16, 32, 64, 128, 256, 275, 512, 800, 900, 1024};
-#ifndef ID_COMPACT
     sprintf(result_path, "./results@%d/%s/%s-hnsw-%s-elastic-%.2f.log", K, dataset, dataset, label, elastic_factor);
     if(num_thread!=1)
         sprintf(result_path, "./results@%d/%s/%s-hnsw-%s-elastic-%.2f-%d.log", K, dataset, dataset, label, elastic_factor,num_thread);
     std::ofstream fout(result_path);
-#else
-    sprintf(result_path, "./results@%d/%s/%s-hnsw-%s-elastic-%.2f-compact.log", K, dataset, dataset, label,
-            elastic_factor);
-    if(num_thread!=1)
-        sprintf(result_path, "./results@%d/%s/%s-hnsw-%s-elastic-%.2f-compact-%d.log", K, dataset, dataset, label, elastic_factor,num_thread);
-    std::ofstream fout(result_path);
-#endif
+
     for (auto ef: efSearch) {
         // search
         if (K > ef) ef = K;

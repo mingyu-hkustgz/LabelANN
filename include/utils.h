@@ -29,7 +29,6 @@
 #include "hnswlib/hnswlib.h"
 #include "config.h"
 #ifndef WIN32
-
 #include<sys/resource.h>
 
 #endif

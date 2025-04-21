@@ -3,7 +3,6 @@ mkdir ./DATA
 mkdir ./results
 mkdir ./results/time-log
 mkdir ./results/space-log
-mkdir ./results@1
 mkdir ./results@10
 
 rm -rf build

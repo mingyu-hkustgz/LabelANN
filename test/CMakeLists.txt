@@ -4,6 +4,8 @@ add_executable(test_opt_hnsw_search test_opt_hnsw_search.cpp)
 
 add_executable(test_elastic_hnsw_build test_elastic_hnsw_build.cpp)
 
+add_executable(test_large_hnsw_build test_large_hnsw_build.cpp)
+
 add_executable(test_elastic_hnsw_search test_elastic_hnsw_search.cpp)
 
 add_executable(test_binary_search test_binary_search.cpp)
