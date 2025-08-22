@@ -14,39 +14,45 @@ for data in "${datasets[@]}"; do
       N=999000
   elif [ $data == "msmarc-small" ]; then
       N=1000000
+  elif [ $data == "laion" ]; then
+      N=1182243
+  elif [ $data == "TripClick" ]; then
+      N=1020825
   elif [ $data == "paper" ]; then
       N=2029997
   elif [ $data == "deep100M" ]; then
       N=100000000
+  elif [ $data == "arxiv-for-fanns-large" ]; then
+      N=2735264
   fi
   for L in {8,12,24,32};do
 
   log_file="./results/time-log/${data}/HNSW-Elastic-Index-time.log"
   start_time=$(date +%s)
-  ./build/test/test_elastic_hnsw_build_compact -d ${data} -s ./DATA/${data}/ -l ${L}_labels_zipf -e 0.2
+  ./build/test/test_elastic_hnsw_build -d ${data} -s ./DATA/${data}/ -l ${L}_labels_zipf -e 0.2
   end_time=$(date +%s)
   duration=$((end_time - start_time))
   echo "Elastic[0.2] L=${L} HNSW Index time: ${duration}(s)" | tee -a ${log_file}
 
-  ./build/test/test_elastic_hnsw_search_compact -d ${data} -s ./DATA/${data}/ -l ${L}_labels_zipf -e 0.2
+  ./build/test/test_elastic_hnsw_search -d ${data} -s ./DATA/${data}/ -l ${L}_labels_zipf -e 0.2
 
-  log_file="./results/time-log/${data}/HNSW-Elastic-Index-time.log"
-  start_time=$(date +%s)
-  ./build/test/test_elastic_hnsw_build_compact -d ${data} -s ./DATA/${data}/ -l ${L}_labels_zipf -e 0.5
-  end_time=$(date +%s)
-  duration=$((end_time - start_time))
-  echo "Elastic[0.5] L=${L} HNSW Index time: ${duration}(s)" | tee -a ${log_file}
-
-  ./build/test/test_elastic_hnsw_search_compact -d ${data} -s ./DATA/${data}/ -l ${L}_labels_zipf -e 0.5
-
-  log_file="./results/time-log/${data}/HNSW-Optimal-Index-time.log"
-  start_time=$(date +%s)
-  ./build/test/test_opt_hnsw_build -d ${data} -s ./DATA/${data}/ -l ${L}_labels_zipf
-  end_time=$(date +%s)
-  duration=$((end_time - start_time))
-  echo "Optimal L=${L} HNSW Index time: ${duration}(s)" | tee -a ${log_file}
-
-  ./build/test/test_opt_hnsw_search -d ${data} -s ./DATA/${data}/ -l ${L}_labels_zipf
+#  log_file="./results/time-log/${data}/HNSW-Elastic-Index-time.log"
+#  start_time=$(date +%s)
+#  ./build/test/test_elastic_hnsw_build_compact -d ${data} -s ./DATA/${data}/ -l ${L}_labels_zipf -e 0.5
+#  end_time=$(date +%s)
+#  duration=$((end_time - start_time))
+#  echo "Elastic[0.5] L=${L} HNSW Index time: ${duration}(s)" | tee -a ${log_file}
+#
+#  ./build/test/test_elastic_hnsw_search_compact -d ${data} -s ./DATA/${data}/ -l ${L}_labels_zipf -e 0.5
+#
+#  log_file="./results/time-log/${data}/HNSW-Optimal-Index-time.log"
+#  start_time=$(date +%s)
+#  ./build/test/test_opt_hnsw_build -d ${data} -s ./DATA/${data}/ -l ${L}_labels_zipf
+#  end_time=$(date +%s)
+#  duration=$((end_time - start_time))
+#  echo "Optimal L=${L} HNSW Index time: ${duration}(s)" | tee -a ${log_file}
+#
+#  ./build/test/test_opt_hnsw_search -d ${data} -s ./DATA/${data}/ -l ${L}_labels_zipf
 
   done
 done

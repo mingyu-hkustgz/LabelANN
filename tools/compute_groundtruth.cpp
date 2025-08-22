@@ -59,16 +59,21 @@ int main(int argc, char** argv) {
     // preparation
     std::shared_ptr<ANNS::DistanceHandler> distance_handler = ANNS::get_distance_handler(data_type, dist_fn);
     auto groundtruth = new std::pair<ANNS::IdxType, float>[query_storage->get_num_points() * K];
+    auto queries_selectivity = std::vector<double>();
+    queries_selectivity.resize(query_storage->get_num_points());
     std::cout << "Computing ground truth using filter then bruteforce search ..." << std::endl;
     auto start_time = std::chrono::high_resolution_clock::now();
 
     // run
     ANNS::FilteredScan algo;
-    algo.run(base_storage, query_storage, distance_handler, scenario, num_threads, K, groundtruth);
+    algo.run(base_storage, query_storage, distance_handler, scenario, num_threads, K, groundtruth, queries_selectivity.data());
     auto time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start_time).count();
     std::cout << "Time cost: " << time_cost << "ms" << std::endl;
 
     // write ground truth to file
     write_gt_file(gt_file, groundtruth, query_storage->get_num_points(), K);
+    std::string queries_selectivity_file = gt_file + "_selectivity.txt";
+    write_query_selectivity_file(queries_selectivity_file, queries_selectivity);
+
     return 0;
 }

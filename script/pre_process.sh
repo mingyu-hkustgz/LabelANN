@@ -17,6 +17,12 @@ for data in "${datasets[@]}"; do
   elif [ $data == "msmarc-small" ]; then
       N=1000000
       QN=1000
+  elif [ $data == "laion" ]; then
+      N=1182243
+      QN=1000
+  elif [ $data == "TripClick" ]; then
+      N=1020825
+      QN=1000
   elif [ $data == "paper" ]; then
       N=2029997
       QN=10000

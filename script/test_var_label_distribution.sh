@@ -19,9 +19,18 @@ for data in "${datasets[@]}"; do
   elif [ $data == "paper" ]; then
       N=2029997
       QN=10000
+  elif [ $data == "laion" ]; then
+      N=1182243
+      QN=1000
   elif [ $data == "deep100M" ]; then
       N=100000000
       QN=1000
+  elif [ $data == "TripClick" ]; then
+      N=1020825
+      QN=1000
+  elif [ $data == "arxiv-for-fanns-large" ]; then
+      N=2735264
+      QN=10000
   fi
 
   L=12

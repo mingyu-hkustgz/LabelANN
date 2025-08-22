@@ -183,7 +183,7 @@ public:
                 dynamic_bitset<> point_bitmap(512, 0);
                 uint64_t check_bit = j, check_loc = 0;
                 while (check_bit) {
-                    if (check_bit & 1) point_bitmap.set(bit_loc[check_loc], true);
+                    if (check_bit & 1ll) point_bitmap.set(bit_loc[check_loc], true);
                     check_loc++;
                     check_bit >>= 1;
                 }
@@ -458,6 +458,25 @@ public:
         power_points = cumulate_points;
         std::cout << "All Points:: " << cumulate_points << std::endl;
         std::cout << "All Points:: " << index_points << std::endl;
+    }
+
+    void save_log(char *filename){
+        std::ofstream out(filename);
+        out<<"Power Points "<<power_points<<std::endl;
+        out<<"Index Points "<<indexed_points<<std::endl;
+        out<<"All Label Set "<<index_set_count<<std::endl;
+        out<<"Select Label Set "<<selected_bitmap.size()<<std::endl;
+        std::vector<uint64_t> size_list;
+        for(auto u:selected_bitmap){
+            size_list.push_back(bitmap_list[u].size());
+        }
+        std::sort(size_list.begin(), size_list.end());
+        for(int i=1;i<=10;i++){
+            auto quantile = size_list.size() * i / 10;
+            out<<size_list[quantile]<<" ";
+        }
+        out<<std::endl;
+
     }
 
 

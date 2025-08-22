@@ -45,7 +45,7 @@ public:
 
     bool operator()(hnswlib::labeltype id) override {
 #ifdef ID_COMPACT
-        return query_bitmap & (id>>32);
+        return query_bitmap & (id>>ID_OffSET);
 #else
         return query_bitmap & label_bit_map_[id];
 #endif
@@ -106,7 +106,7 @@ public:
 #ifndef ID_COMPACT
                         results[i * K + back_tag].first = hnsw_result.top().second;
 #else
-                        results[i * K + back_tag].first = hnsw_result.top().second>>32;
+                        results[i * K + back_tag].first = hnsw_result.top().second>>ID_OffSET;
 #endif
                         results[i * K + back_tag].second = hnsw_result.top().first;
                         hnsw_result.pop();
@@ -121,7 +121,7 @@ public:
 #ifndef ID_COMPACT
                         results[i * K + back_tag].first = hnsw_result.top().second;
 #else
-                        results[i * K + back_tag].first = hnsw_result.top().second>>32;
+                        results[i * K + back_tag].first = hnsw_result.top().second>>ID_OffSET;
 #endif
                         results[i * K + back_tag].second = hnsw_result.top().first;
                         hnsw_result.pop();
@@ -168,17 +168,17 @@ public:
             std::vector<short> bit_loc;
             short cnt = 0;
             while (bit_map) {
-                if (bit_map & 1) bit_loc.push_back(cnt);
+                if (bit_map & 1ull) bit_loc.push_back(cnt);
                 cnt++;
-                bit_map >>= 1;
+                bit_map >>= 1ull;
             }
-            for (uint64_t j = 0; j < (1 << bit_size); j++) {
+            for (uint64_t j = 0; j < (1ull << bit_size); j++) {
                 uint64_t point_bitmap = 0;
                 uint64_t check_bit = j, check_loc = 0;
                 while (check_bit) {
-                    if (check_bit & 1) point_bitmap |= (1 << bit_loc[check_loc]);
+                    if (check_bit & 1ull) point_bitmap |= (1ull << bit_loc[check_loc]);
                     check_loc++;
-                    check_bit >>= 1;
+                    check_bit >>= 1ull;
                 }
                 bitmap_list[point_bitmap].push_back(i);
             }
@@ -199,17 +199,17 @@ public:
             std::vector<short> bit_loc;
             short cnt = 0;
             while (bit_map) {
-                if (bit_map & 1) bit_loc.push_back(cnt);
+                if (bit_map & 1ull) bit_loc.push_back(cnt);
                 cnt++;
-                bit_map >>= 1;
+                bit_map >>= 1ull;
             }
-            for (uint64_t j = 0; j < (1 << bit_size); j++) {
+            for (uint64_t j = 0; j < (1ull << bit_size); j++) {
                 uint64_t point_bitmap = 0;
                 uint64_t check_bit = j, check_loc = 0;
                 while (check_bit) {
-                    if (check_bit & 1) point_bitmap |= (1 << bit_loc[check_loc]);
+                    if (check_bit & 1ull) point_bitmap |= (1ull << bit_loc[check_loc]);
                     check_loc++;
-                    check_bit >>= 1;
+                    check_bit >>= 1ull;
                 }
                 auto cover_size = bitmap_list[point_bitmap].size();
                 if ((double) index_size / (double) cover_size > elastic_factor_)
@@ -338,9 +338,9 @@ public:
 #pragma omp parallel for schedule(dynamic, 144)
             for (int i = 0; i < points_num; i++) {
 #ifndef ID_COMPACT
-                appr_alg->addPoint(X.data + (size_t) vec_list[i] * D, vec_list[i]);
+                appr_alg->addPoint(X.data + (size_t) vec_list[i] * (size_t) D, vec_list[i]);
 #else
-                appr_alg->addPoint(X.data + (size_t) vec_list[i] * D, (vec_list[i]<<32) + label_bitmap[vec_list[i]]);
+                appr_alg->addPoint(X.data + (size_t) vec_list[i] * (size_t) D, (vec_list[i]<<ID_OffSET) + label_bitmap[vec_list[i]]);
 #endif
             }
             cumulate_points += points_num;
@@ -419,10 +419,13 @@ public:
             fin.read((char *) &size, sizeof(unsigned));
             cumulate_points += size;
             bitmap_list[bitmap].resize(size);
-            fin.read((char *) bitmap_list[bitmap].data(), sizeof(size_t) * (size_t) size);
+            fin.read((char *) bitmap_list[bitmap].data(), sizeof(uint64_t) * (size_t) size);
             fin.read((char *) &father, sizeof(uint64_t));
             fa_[bitmap] = father;
+            std::cout<<"Now:: "<<bitmap<<" "<<size<<std::endl;
+            std::cout<<std::endl;
             if (size >= INDEX_ELASIIC_BOUND && fa_[bitmap] == bitmap){
+                std::cout<<bitmap<<" "<<size<<std::endl;
                 load_single_static_index(appr_alg_list[bitmap], fin, bitmap);
                 index_points += size;
             }
@@ -430,6 +433,26 @@ public:
         power_points = cumulate_points;
         std::cout << "All Points:: " << cumulate_points << std::endl;
         std::cout << "All Points:: " << index_points << std::endl;
+    }
+
+    void save_log(char *filename){
+        std::ofstream out(filename);
+        out<<"Power Points "<<power_points<<std::endl;
+        out<<"Index Points "<<indexed_points<<std::endl;
+        out<<"All Label Set "<<index_set_count<<std::endl;
+        out<<"Select Label Set "<<selected_bitmap.size()<<std::endl;
+        std::vector<uint64_t> size_list;
+        for(auto u:selected_bitmap){
+            size_list.push_back(bitmap_list[u].size());
+        }
+        std::sort(size_list.begin(), size_list.end());
+        for(int i=1;i<=10;i++){
+            auto quantile = size_list.size() * i / 10;
+            if(quantile == size_list.size()) quantile--;
+            out<<size_list[quantile]<<" ";
+        }
+        out<<std::endl;
+
     }
 
 

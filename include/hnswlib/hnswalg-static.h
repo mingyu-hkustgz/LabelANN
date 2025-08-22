@@ -204,7 +204,7 @@ namespace hnswlib {
 #ifndef ID_COMPACT
             auto Label = getExternalLabel(internal_id);
 #else
-            auto Label = getExternalLabel(internal_id)>>32;
+            auto Label = getExternalLabel(internal_id)>>ID_OffSET;
 #endif
             return (static_base_data_ + Label * data_size_);
         }
@@ -937,7 +937,7 @@ namespace hnswlib {
 #ifndef ID_COMPACT
             std::unique_lock <std::mutex> lock_label(getLabelOpMutex(label));
 #else
-            std::unique_lock <std::mutex> lock_label(getLabelOpMutex(label>>32));
+            std::unique_lock <std::mutex> lock_label(getLabelOpMutex(label>>ID_OffSET));
 #endif
             if (!replace_deleted) {
                 addPoint(data_point, label, -1);
@@ -1140,9 +1140,11 @@ namespace hnswlib {
 #ifndef ID_COMPACT
                 auto search = label_lookup_.find(label);
 #else
-                auto search = label_lookup_.find(label>>32);
+                auto search = label_lookup_.find(label>>ID_OffSET);
 #endif
                 if (search != label_lookup_.end()) {
+                    std::cerr<<label<<" "<<(label>>ID_OffSET)<<std::endl;
+                    throw std::runtime_error("Duplicate Add.");
                     tableint existingInternalId = search->second;
                     if (allow_replace_deleted_) {
                         if (isMarkedDeleted(existingInternalId)) {
@@ -1168,7 +1170,7 @@ namespace hnswlib {
 #ifndef ID_COMPACT
                 label_lookup_[label] = cur_c;
 #else
-                label_lookup_[label>>32] = cur_c;
+                label_lookup_[label>>ID_OffSET] = cur_c;
 #endif
             }
 

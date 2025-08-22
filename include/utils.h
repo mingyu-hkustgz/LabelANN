@@ -34,7 +34,7 @@
 #endif
 #define RANG_BOUND 1024
 #define EPS_GROUND 1e-4
-
+#define ID_OffSET 32 // ID OFFSET COMPRESS ID and Label Bitmap by split 64bit ID into [Bitmap][ID]
 struct Neighbor {
     unsigned id;
     float distance;
@@ -89,6 +89,20 @@ void write_gt_file(const std::string& filename, const std::pair<ANNS::IdxType, f
     std::ofstream fout(filename, std::ios::binary);
     fout.write(reinterpret_cast<const char*>(gt), num_queries * K * sizeof(std::pair<ANNS::IdxType, float>));
     std::cout << "Ground truth written to " << filename << std::endl;
+}
+
+void write_query_selectivity_file(const std::string& filename, const std::vector<double>& query_selectivity)
+{
+    std::cout << "Writing query selectivity to " << filename << std::endl;
+    std::ofstream fout(filename);
+    float avg_selectivity = 0;
+    fout << std::fixed;
+    for (const auto& val : query_selectivity) {
+      fout  << val << std::endl;
+      avg_selectivity += val;
+    }
+    fout << "avg selectivity: " << avg_selectivity / query_selectivity.size() << std::endl;
+    fout.close();
 }
 
 
@@ -201,12 +215,13 @@ void load_bitmap(const char *filename, std::vector<uint64_t> &label_bitmap, unsi
             bitmap |= (1ull << (std::atoi(t.c_str()) - 1));
         }
         label_bitmap.push_back(bitmap);
+        if(cumulate_points==22905) std::cout<<cumulate_points<<" "<<bitmap<<std::endl;
         if (_mm_popcnt_u64(bitmap) > max_bits) max_bits = _mm_popcnt_u64(bitmap);
         if(cumulate_points==points_num) break;
     }
     std::cerr << "Max bits:" << max_bits << std::endl;
 #ifdef ID_COMPACT
-    if(max_bits>32) std::cerr<<"EROOR ID_COMPACT WORKS ONLY FOR LESS THAN 32 BITS"<<std::endl;
+    if(max_bits>ID_OffSET) std::cerr<<"EROOR ID_COMPACT WORKS ONLY FOR LESS THAN ID_OffSET BITS"<<std::endl;
 #endif
 }
 

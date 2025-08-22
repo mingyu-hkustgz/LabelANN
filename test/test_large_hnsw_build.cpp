@@ -36,6 +36,7 @@ int main(int argc, char *argv[]) {
     char query_label_path[256] = "";
     char result_path[256] = "";
     char file_type[256] = "fvecs";
+    char logger_path[256] = "";
     while (iarg != -1) {
         iarg = getopt_long(argc, argv, "d:s:t:k:l:e:f:", longopts, &ind);
         switch (iarg) {
@@ -77,7 +78,7 @@ int main(int argc, char *argv[]) {
 #else
     sprintf(index_path, "%s%s_elastic_%.2f_compact.hnsw", source, dataset, elastic_factor);
 #endif
-
+    sprintf(logger_path, "./results/%s-%.2f-%s.log", dataset, elastic_factor,label);
     sprintf(ground_path, "%s%s_gt_%s_containment.bin", source, dataset, label);
     sprintf(base_label_path, "%s%s_base_%s.txt", source, dataset, label);
     sprintf(query_label_path, "%s%s_query_%s_containment.txt", source, dataset, label);
@@ -91,6 +92,7 @@ int main(int argc, char *argv[]) {
     hnsw_elastic.load_base_label_bitmap(base_label_path);
     hnsw_elastic.load_query_label_bitmap(query_label_path, Q.n);
     hnsw_elastic.build_elastic_index(X);
+    hnsw_elastic.save_log(logger_path);
 
     std::vector efSearch{10, 16, 32, 64, 128, 256, 275, 512, 800, 900, 1024};
     sprintf(result_path, "./results@%d/%s/%s-hnsw-%s-elastic-%.2f.log", K, dataset, dataset, label, elastic_factor);

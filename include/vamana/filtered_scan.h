@@ -55,12 +55,13 @@ namespace ANNS {
         // for computing groundtruth: process all query with the same label set together
         void run(std::shared_ptr<IStorage> base_storage, std::shared_ptr<IStorage> query_storage,
                  std::shared_ptr<DistanceHandler> distance_handler, std::string scenario,
-                 uint32_t num_threads, IdxType K, std::pair<IdxType, float>* results){
+                 uint32_t num_threads, IdxType K, std::pair<IdxType, float>* results, double*queries_selectivity){
             _base_storage = base_storage;
             _query_storage = query_storage;
             _distance_handler = distance_handler;
             _results = results;
             _K = K;
+            _queries_selectivity = queries_selectivity;
 
             // init trie index for base and query label sets
             std::cout << "- Scenario: " << scenario << std::endl;
@@ -97,6 +98,7 @@ namespace ANNS {
         std::shared_ptr<DistanceHandler> _distance_handler;
         std::pair<IdxType, float>* _results;
         IdxType _K;
+        double*_queries_selectivity;
 
         // trie index for label sets
         TrieIndex base_trie_index, query_trie_index;
@@ -186,6 +188,9 @@ namespace ANNS {
             }
             if (!enough_answer)
                 std::cout << "! Warning: query " << query_vec_id << " has less than " << _K << " answers, the calculated recall will be smaller!" << std::endl;
+
+            // write the selectivity
+            _queries_selectivity[query_vec_id] = num_cmps / _base_storage->get_num_points();
 
             return num_cmps;
         }
