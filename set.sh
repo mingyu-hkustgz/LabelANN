@@ -1,4 +1,4 @@
-export datasets=("arxiv-for-fanns-medium")
+export datasets=("OpenAI-1536")
 labelsets=("real")
 
 #export datasets=("sift")

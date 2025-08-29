@@ -119,8 +119,10 @@ int main(int argc, char *argv[]) {
         std::cout << "- QPS: " << Q.n * 1000.0 / time_cost << std::endl;
         // calculate recall
         auto recall = calculate_recall(gt, results, Q.n, K);
+        auto ave_ratio = getRatio(gt, results, Q.n, K);
         std::cout << "- Recall: " << recall << "%" << std::endl;
-        fout << recall << " " << Q.n * 1000.0 / time_cost << std::endl;
+        std::cout << "- Ratio: " << ave_ratio <<std::endl;
+        fout << recall << " " << Q.n * 1000.0 / time_cost<<" "<<ave_ratio<< std::endl;
         if(recall > 99.9) break;
     }
 

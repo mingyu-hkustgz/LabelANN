@@ -422,10 +422,7 @@ public:
             fin.read((char *) bitmap_list[bitmap].data(), sizeof(uint64_t) * (size_t) size);
             fin.read((char *) &father, sizeof(uint64_t));
             fa_[bitmap] = father;
-            std::cout<<"Now:: "<<bitmap<<" "<<size<<std::endl;
-            std::cout<<std::endl;
             if (size >= INDEX_ELASIIC_BOUND && fa_[bitmap] == bitmap){
-                std::cout<<bitmap<<" "<<size<<std::endl;
                 load_single_static_index(appr_alg_list[bitmap], fin, bitmap);
                 index_points += size;
             }

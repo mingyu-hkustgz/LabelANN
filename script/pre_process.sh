@@ -26,6 +26,12 @@ for data in "${datasets[@]}"; do
   elif [ $data == "paper" ]; then
       N=2029997
       QN=10000
+  elif [ $data == "arxiv-for-fanns-large" ]; then
+      N=2735264
+      QN=1000
+  elif [ $data == "arxiv-for-fanns-medium" ]; then
+      N=100000
+      QN=1000
   elif [ $data == "deep100M" ]; then
       N=100000000
       QN=1000
@@ -42,7 +48,7 @@ for data in "${datasets[@]}"; do
       --output_file ./DATA/${data}/${data}_query_${L}_labels_zipf_containment.txt
 
   ./build/tools/compute_groundtruth \
-      --data_type float --dist_fn L2 --scenario containment --K 10 --num_threads 144 \
+      --data_type float --dist_fn L2 --scenario containment --K 10 --num_threads 1 \
       --base_bin_file ./DATA/${data}/${data}_base.fvecs \
       --base_label_file ./DATA/${data}/${data}_base_${L}_labels_zipf.txt \
       --query_bin_file ./DATA/${data}/${data}_query.fvecs \

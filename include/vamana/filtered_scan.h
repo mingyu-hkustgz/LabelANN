@@ -82,12 +82,15 @@ namespace ANNS {
                 } else {
                     compute_base_super_sets(scenario, query_label_set, target_group_ids);
                 }
-
+                auto start_time = std::chrono::high_resolution_clock::now();
                 // find the nearest neighbors for each query vector
                 omp_set_num_threads(num_threads);
 #pragma omp parallel for schedule(dynamic, 1)
                 for (auto query_vec_id : query_group_id_to_vec_ids[query_group_id])
                     answer_one_query(query_vec_id, target_group_ids);
+                auto time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(
+                        std::chrono::high_resolution_clock::now() - start_time).count();
+                brute_time += time_cost;
             }
         }
 
@@ -99,6 +102,7 @@ namespace ANNS {
         std::pair<IdxType, float>* _results;
         IdxType _K;
         double*_queries_selectivity;
+        double brute_time;
 
         // trie index for label sets
         TrieIndex base_trie_index, query_trie_index;
@@ -193,6 +197,10 @@ namespace ANNS {
             _queries_selectivity[query_vec_id] = num_cmps / _base_storage->get_num_points();
 
             return num_cmps;
+        }
+    public:
+        double get_process_time() const{
+            return brute_time;
         }
 
     };

@@ -22,6 +22,8 @@ for data in "${datasets[@]}"; do
       N=2029997
   elif [ $data == "deep100M" ]; then
       N=100000000
+  elif [ $data == "arxiv-for-fanns-medium" ]; then
+      N=100000
   elif [ $data == "arxiv-for-fanns-large" ]; then
       N=2735264
   fi

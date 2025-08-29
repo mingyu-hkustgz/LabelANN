@@ -4,7 +4,7 @@
 #include <boost/program_options.hpp>
 #include "vamana/filtered_scan.h"
 #include "utils.h"
-
+#include <iomanip>
 namespace po = boost::program_options;
 
 
@@ -69,11 +69,13 @@ int main(int argc, char** argv) {
     algo.run(base_storage, query_storage, distance_handler, scenario, num_threads, K, groundtruth, queries_selectivity.data());
     auto time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start_time).count();
     std::cout << "Time cost: " << time_cost << "ms" << std::endl;
-
+    double brute_time_cost = algo.get_process_time();
     // write ground truth to file
     write_gt_file(gt_file, groundtruth, query_storage->get_num_points(), K);
     std::string queries_selectivity_file = gt_file + "_selectivity.txt";
     write_query_selectivity_file(queries_selectivity_file, queries_selectivity);
-
+    std::string brute_file = gt_file + std::to_string(K)+ "_brute.txt";
+    std::ofstream fout(brute_file.c_str());
+    fout<< std::fixed << std::setprecision(3) << (double) query_storage->get_num_points() * 1000.0 / (double)brute_time_cost<<std::endl;
     return 0;
 }

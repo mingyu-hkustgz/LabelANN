@@ -2,6 +2,7 @@
 // Created by mingyu on 23-8-21.
 //
 #pragma once
+
 #include <chrono>
 #include <queue>
 #include <unordered_set>
@@ -28,13 +29,15 @@
 #include <queue>
 #include "hnswlib/hnswlib.h"
 #include "config.h"
+
 #ifndef WIN32
+
 #include<sys/resource.h>
 
 #endif
 #define RANG_BOUND 1024
 #define EPS_GROUND 1e-4
-#define ID_OffSET 32 // ID OFFSET COMPRESS ID and Label Bitmap by split 64bit ID into [Bitmap][ID]
+#define ID_OffSET 40 // ID OFFSET COMPRESS ID and Label Bitmap by split 64bit ID into [Bitmap][ID]
 struct Neighbor {
     unsigned id;
     float distance;
@@ -49,23 +52,23 @@ struct Neighbor {
     }
 };
 
-bool endsWith(const std::string& str, const std::string& suffix) {
+bool endsWith(const std::string &str, const std::string &suffix) {
     if (str.length() < suffix.length()) {
         return false;
     }
     return str.compare(str.length() - suffix.length(), suffix.length(), suffix) == 0;
 }
 
-void write_kv_file(const std::string& filename, const std::map<std::string, std::string>& kv_map) {
+void write_kv_file(const std::string &filename, const std::map<std::string, std::string> &kv_map) {
     std::ofstream out(filename);
-    for (auto& kv : kv_map) {
+    for (auto &kv: kv_map) {
         out << kv.first << "=" << kv.second << std::endl;
     }
     out.close();
 }
 
 
-std::map<std::string, std::string> parse_kv_file(const std::string& filename) {
+std::map<std::string, std::string> parse_kv_file(const std::string &filename) {
     std::map<std::string, std::string> kv_map;
     std::ifstream in(filename);
     std::string line;
@@ -80,40 +83,42 @@ std::map<std::string, std::string> parse_kv_file(const std::string& filename) {
     in.close();
     return kv_map;
 }
+
 bool isFileExists_ifstream(const char *name) {
     std::ifstream f(name);
     return f.good();
 }
 
-void write_gt_file(const std::string& filename, const std::pair<ANNS::IdxType, float>* gt, uint32_t num_queries, uint32_t K) {
+void write_gt_file(const std::string &filename, const std::pair<ANNS::IdxType, float> *gt, uint32_t num_queries,
+                   uint32_t K) {
     std::ofstream fout(filename, std::ios::binary);
-    fout.write(reinterpret_cast<const char*>(gt), num_queries * K * sizeof(std::pair<ANNS::IdxType, float>));
+    fout.write(reinterpret_cast<const char *>(gt), num_queries * K * sizeof(std::pair<ANNS::IdxType, float>));
     std::cout << "Ground truth written to " << filename << std::endl;
 }
 
-void write_query_selectivity_file(const std::string& filename, const std::vector<double>& query_selectivity)
-{
+void write_query_selectivity_file(const std::string &filename, const std::vector<double> &query_selectivity) {
     std::cout << "Writing query selectivity to " << filename << std::endl;
     std::ofstream fout(filename);
     float avg_selectivity = 0;
     fout << std::fixed;
-    for (const auto& val : query_selectivity) {
-      fout  << val << std::endl;
-      avg_selectivity += val;
+    for (const auto &val: query_selectivity) {
+        fout << val << std::endl;
+        avg_selectivity += val;
     }
     fout << "avg selectivity: " << avg_selectivity / query_selectivity.size() << std::endl;
     fout.close();
 }
 
 
-void load_gt_file(const std::string& filename, std::pair<ANNS::IdxType, float>* gt, uint32_t num_queries, uint32_t K) {
+void load_gt_file(const std::string &filename, std::pair<ANNS::IdxType, float> *gt, uint32_t num_queries, uint32_t K) {
     std::ifstream fin(filename, std::ios::binary);
-    fin.read(reinterpret_cast<char*>(gt), num_queries * K * sizeof(std::pair<ANNS::IdxType, float>));
+    fin.read(reinterpret_cast<char *>(gt), num_queries * K * sizeof(std::pair<ANNS::IdxType, float>));
     std::cout << "Ground truth loaded from " << filename << std::endl;
 }
 
 
-float calculate_recall(const std::pair<ANNS::IdxType, float>* gt, const std::pair<ANNS::IdxType, float>* results, uint32_t num_queries, uint32_t K) {
+float calculate_recall(const std::pair<ANNS::IdxType, float> *gt, const std::pair<ANNS::IdxType, float> *results,
+                       uint32_t num_queries, uint32_t K) {
     float total_correct = 0;
     for (uint32_t i = 0; i < num_queries; i++) {
 
@@ -130,7 +135,7 @@ float calculate_recall(const std::pair<ANNS::IdxType, float>* gt, const std::pai
         for (uint32_t j = 0; j < K; j++) {
             if (results[i * K + j].first == -1)
                 break;
-            if (offset >=0 && results[i * K + j].second == gt[i * K + offset].second) {           // for ties
+            if (offset >= 0 && results[i * K + j].second == gt[i * K + offset].second) {           // for ties
                 total_correct++;
                 offset--;
             } else {
@@ -147,8 +152,7 @@ typedef std::priority_queue<std::pair<float, hnswlib::labeltype>> ResultQueue;
 #define RANGANN_UTILS_H
 
 
-
-inline float sqr_dist(const float *d,const float *q, uint32_t L) {
+inline float sqr_dist(const float *d, const float *q, uint32_t L) {
     float PORTABLE_ALIGN32 TmpRes[8] = {0, 0, 0, 0, 0, 0, 0, 0};
     uint32_t num_blk16 = L >> 4;
     uint32_t l = L & 0b1111;
@@ -203,7 +207,7 @@ void load_bitmap(const char *filename, std::vector<uint64_t> &label_bitmap, unsi
     label_bitmap.reserve(points_num);
     unsigned max_bits = 0;
     while (std::getline(fin, line)) {
-        cumulate_points ++;
+        cumulate_points++;
         uint64_t bitmap = 0;
         std::istringstream iss(line);
         std::string token;
@@ -215,9 +219,8 @@ void load_bitmap(const char *filename, std::vector<uint64_t> &label_bitmap, unsi
             bitmap |= (1ull << (std::atoi(t.c_str()) - 1));
         }
         label_bitmap.push_back(bitmap);
-        if(cumulate_points==22905) std::cout<<cumulate_points<<" "<<bitmap<<std::endl;
         if (_mm_popcnt_u64(bitmap) > max_bits) max_bits = _mm_popcnt_u64(bitmap);
-        if(cumulate_points==points_num) break;
+        if (cumulate_points == points_num) break;
     }
     std::cerr << "Max bits:" << max_bits << std::endl;
 #ifdef ID_COMPACT
@@ -317,7 +320,21 @@ int InsertIntoPool(Neighbor *addr, unsigned K, Neighbor nn) {
     return right;
 }
 
-
+float getRatio(const std::pair<ANNS::IdxType, float> *gt, const std::pair<ANNS::IdxType, float> *results,
+               uint32_t num_queries, uint32_t K) {
+    long double ret = 0;
+    int valid_k = 0;
+    for (uint32_t i = 0; i < num_queries; i++) {
+        for (int j = 0; j < K; j++) {
+            if (gt[i * K + j].second > 1e-5) {
+                ret += std::sqrt(results[i * K + j].second / gt[i * K + j].second);
+                valid_k++;
+            }
+        }
+    }
+    if (valid_k == 0) return 1.0;
+    return ret / valid_k;
+}
 
 
 #ifndef WIN32

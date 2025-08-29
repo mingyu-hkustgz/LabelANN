@@ -76,6 +76,6 @@ int main(int argc, char *argv[]) {
     hnsw_elastic.set_elastic_factor(elastic_factor);
     hnsw_elastic.build_elastic_index(X);
     hnsw_elastic.save_elastic_index(index_path);
-//    hnsw_elastic.save_log(logger_path);
+    hnsw_elastic.save_log(logger_path);
     return 0;
 }
