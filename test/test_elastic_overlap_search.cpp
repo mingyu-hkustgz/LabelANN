@@ -78,9 +78,9 @@ int main(int argc, char *argv[]) {
     sprintf(index_path, "%s%s_elastic_%.2f_compact.hnsw", source, dataset, elastic_factor);
 #endif
 
-    sprintf(ground_path, "%s%s_gt_%s_containment.bin", source, dataset, label);
+    sprintf(ground_path, "%s%s_gt_%s_overlap.bin", source, dataset, label);
     sprintf(base_label_path, "%s%s_base_%s.txt", source, dataset, label);
-    sprintf(query_label_path, "%s%s_query_%s_containment.txt", source, dataset, label);
+    sprintf(query_label_path, "%s%s_query_%s_overlap.txt", source, dataset, label);
     Matrix<float> X(data_path);
     Matrix<float> Q(query_path);
     auto gt = new std::pair<ANNS::IdxType, float>[Q.n * K];
@@ -92,17 +92,17 @@ int main(int argc, char *argv[]) {
     hnsw_elastic.load_query_label_bitmap(query_label_path, Q.n);
     hnsw_elastic.load_elastic_index(index_path);
 
-    std::vector efSearch{10, 16, 32, 64, 128, 256, 275, 300, 400, 512, 600, 700, 800, 900, 1024};
+    std::vector efSearch{10, 16, 32, 64, 128, 256, 275, 512, 1024};
 #ifndef ID_COMPACT
-    sprintf(result_path, "./results@%d/%s/%s-hnsw-%s-elastic-%.2f.log", K, dataset, dataset, label, elastic_factor);
+    sprintf(result_path, "./results@%d/%s/%s-hnsw-%s-overlap-%.2f.log", K, dataset, dataset, label, elastic_factor);
     if(num_thread!=1)
-        sprintf(result_path, "./results@%d/%s/%s-hnsw-%s-elastic-%.2f-%d.log", K, dataset, dataset, label, elastic_factor,num_thread);
+        sprintf(result_path, "./results@%d/%s/%s-hnsw-%s-overlap-%.2f-%d.log", K, dataset, dataset, label, elastic_factor,num_thread);
     std::ofstream fout(result_path);
 #else
-    sprintf(result_path, "./results@%d/%s/%s-hnsw-%s-elastic-%.2f-compact.log", K, dataset, dataset, label,
+    sprintf(result_path, "./results@%d/%s/%s-hnsw-%s-overlap-%.2f-compact.log", K, dataset, dataset, label,
             elastic_factor);
     if(num_thread!=1)
-        sprintf(result_path, "./results@%d/%s/%s-hnsw-%s-elastic-%.2f-compact-%d.log", K, dataset, dataset, label, elastic_factor,num_thread);
+        sprintf(result_path, "./results@%d/%s/%s-hnsw-%s-overlap-%.2f-compact-%d.log", K, dataset, dataset, label, elastic_factor,num_thread);
     std::ofstream fout(result_path);
 #endif
     for (auto ef: efSearch) {
@@ -110,7 +110,7 @@ int main(int argc, char *argv[]) {
         if (K > ef) ef = K;
         std::cout << "Start querying ..." << std::endl;
         auto start_time = std::chrono::high_resolution_clock::now();
-        auto results = hnsw_elastic.contain_parallel_search(Q.data, K, ef, num_thread);
+        auto results = hnsw_elastic.overlap_naive_search(Q.data, K, ef);
         auto time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(
                 std::chrono::high_resolution_clock::now() - start_time).count();
 

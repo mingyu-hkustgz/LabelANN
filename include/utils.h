@@ -37,7 +37,7 @@
 #endif
 #define RANG_BOUND 1024
 #define EPS_GROUND 1e-4
-#define ID_OffSET 40 // ID OFFSET COMPRESS ID and Label Bitmap by split 64bit ID into [Bitmap][ID]
+#define ID_OffSET 32 // ID OFFSET COMPRESS ID and Label Bitmap by split 64bit ID into [Bitmap][ID]
 struct Neighbor {
     unsigned id;
     float distance;
@@ -148,8 +148,6 @@ float calculate_recall(const std::pair<ANNS::IdxType, float> *gt, const std::pai
 }
 
 typedef std::priority_queue<std::pair<float, hnswlib::labeltype>> ResultQueue;
-
-#define RANGANN_UTILS_H
 
 
 inline float sqr_dist(const float *d, const float *q, uint32_t L) {

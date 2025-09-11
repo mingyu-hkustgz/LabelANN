@@ -36,7 +36,7 @@ for data in "${datasets[@]}"; do
       N=100000000
       QN=1000
   fi
-  for L in {8,12,24,32};do
+  for L in {12,24};do
 
   ./build/tools/generate_base_labels \
       --num_labels $L --num_points $N --distribution_type zipf \

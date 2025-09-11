@@ -1,5 +1,5 @@
-export datasets=("OpenAI-1536")
-labelsets=("real")
+export datasets=("arxiv-for-fanns-medium")
+labelsets=("zipf")
 
 #export datasets=("sift")
 #labelsets=("zipf")

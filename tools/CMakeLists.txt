@@ -6,3 +6,6 @@ target_link_libraries(generate_query_labels Boost::program_options)
 
 add_executable(compute_groundtruth compute_groundtruth.cpp)
 target_link_libraries(compute_groundtruth  Boost::program_options)
+
+add_executable(local_test_overlap_groundtruth local_test_overlap_groundtruth.cpp)
+target_link_libraries(local_test_overlap_groundtruth Boost::program_options)

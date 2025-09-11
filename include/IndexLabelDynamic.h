@@ -44,11 +44,7 @@ public:
     }
 
     bool operator()(hnswlib::labeltype id) override {
-#ifdef ID_COMPACT
-        return query_bitmap & (id>>ID_OffSET);
-#else
         return query_bitmap & label_bit_map_[id];
-#endif
     }
 };
 
@@ -103,11 +99,7 @@ public:
                     unsigned back_tag = K;
                     while (!hnsw_result.empty()) {
                         back_tag--;
-#ifndef ID_COMPACT
                         results[i * K + back_tag].first = hnsw_result.top().second;
-#else
-                        results[i * K + back_tag].first = hnsw_result.top().second>>ID_OffSET;
-#endif
                         results[i * K + back_tag].second = hnsw_result.top().first;
                         hnsw_result.pop();
                     }
@@ -118,11 +110,7 @@ public:
                     unsigned back_tag = K;
                     while (!hnsw_result.empty()) {
                         back_tag--;
-#ifndef ID_COMPACT
                         results[i * K + back_tag].first = hnsw_result.top().second;
-#else
-                        results[i * K + back_tag].first = hnsw_result.top().second>>ID_OffSET;
-#endif
                         results[i * K + back_tag].second = hnsw_result.top().first;
                         hnsw_result.pop();
                     }
@@ -153,11 +141,7 @@ public:
             unsigned back_tag = K;
             while (!hnsw_result.empty()) {
                 back_tag--;
-#ifndef ID_COMPACT
                 results[i * K + back_tag].first = hnsw_result.top().second;
-#else
-                results[i * K + back_tag].first = hnsw_result.top().second>>ID_OffSET;
-#endif
                 results[i * K + back_tag].second = hnsw_result.top().first;
                 hnsw_result.pop();
             }
@@ -262,10 +246,8 @@ public:
 
     void load_base_label_bitmap(const char *filename) {
         load_bitmap(filename, label_bitmap, N);
-#ifndef ID_COMPACT
         ContainLabelFilter::label_bit_map_ = label_bitmap.data();
         InterLabelFilter::label_bit_map_ = label_bitmap.data();
-#endif
         std::cout << "Base Label Load Finished" << std::endl;
     }
 

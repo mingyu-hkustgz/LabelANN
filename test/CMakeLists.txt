@@ -8,13 +8,21 @@ add_executable(test_large_hnsw_build test_large_hnsw_build.cpp)
 
 add_executable(test_elastic_hnsw_search test_elastic_hnsw_search.cpp)
 
-add_executable(test_binary_search test_binary_search.cpp)
+add_executable(test_elastic_overlap_search test_elastic_overlap_search.cpp)
+
+add_executable(test_elastic_hnsw_dynamic test_elastic_hnsw_dynamic.cpp)
 
 add_executable(test_elastic_hnsw_build_compact test_elastic_hnsw_build.cpp)
 target_compile_definitions(test_elastic_hnsw_build_compact PRIVATE ID_COMPACT)
 
 add_executable(test_elastic_hnsw_search_compact test_elastic_hnsw_search.cpp)
 target_compile_definitions(test_elastic_hnsw_search_compact PRIVATE ID_COMPACT)
+
+add_executable(test_elastic_hnsw_search_ip test_elastic_hnsw_search.cpp)
+target_compile_definitions(test_elastic_hnsw_search_ip PRIVATE USE_INNER_PRODUCT)
+
+add_executable(test_elastic_hnsw_build_ip test_elastic_hnsw_build.cpp)
+target_compile_definitions(test_elastic_hnsw_build_ip PRIVATE USE_INNER_PRODUCT)
 
 add_executable(test_vamana_build test_vamana_build.cpp)
 target_link_libraries(test_vamana_build Boost::program_options)

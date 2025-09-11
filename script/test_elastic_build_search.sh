@@ -27,7 +27,7 @@ for data in "${datasets[@]}"; do
   elif [ $data == "arxiv-for-fanns-large" ]; then
       N=2735264
   fi
-  for L in {8,12,24,32};do
+  for L in {12,24};do
 
   log_file="./results/time-log/${data}/HNSW-Elastic-Index-time.log"
   start_time=$(date +%s)
@@ -37,6 +37,15 @@ for data in "${datasets[@]}"; do
   echo "Elastic[0.2] L=${L} HNSW Index time: ${duration}(s)" | tee -a ${log_file}
 
   ./build/test/test_elastic_hnsw_search -d ${data} -s ./DATA/${data}/ -l ${L}_labels_zipf -e 0.2
+
+    log_file="./results/time-log/${data}/HNSW-Elastic-Index-time.log"
+    start_time=$(date +%s)
+    ./build/test/test_elastic_hnsw_build -d ${data} -s ./DATA/${data}/ -l ${L}_labels_zipf -e 2.0
+    end_time=$(date +%s)
+    duration=$((end_time - start_time))
+    echo "Elastic[0.2] L=${L} HNSW Index time: ${duration}(s)" | tee -a ${log_file}
+
+    ./build/test/test_elastic_hnsw_search -d ${data} -s ./DATA/${data}/ -l ${L}_labels_zipf -e 2.0
 
 #  log_file="./results/time-log/${data}/HNSW-Elastic-Index-time.log"
 #  start_time=$(date +%s)
