@@ -141,7 +141,6 @@ public:
         return results;
     }
 
-
     std::pair<ANNS::IdxType, float> *
     contain_naive_search(const float *query, unsigned K, unsigned nprobs) {
         auto results = new std::pair<ANNS::IdxType, float>[query_bitmap.size() * K];
@@ -164,7 +163,6 @@ public:
         }
         return results;
     }
-
 
     std::pair<ANNS::IdxType, float> *
     overlap_naive_search(const float *query, unsigned K, unsigned nprobs) {
@@ -257,8 +255,6 @@ public:
         }
         return results;
     }
-
-
 
     void load_base_label_bitmap(const char *filename) {
         load_bitmap(filename, label_bitmap, N);
@@ -392,6 +388,7 @@ public:
     }
 
     void find_cover_father() {
+        fa_.clear();
         std::unordered_map<uint64_t, double> cover_ratio;
         for (auto father: selected_bitmap) {
             indexed_points += bitmap_list[father].size();
@@ -430,8 +427,7 @@ public:
         elastic_factor_ = final_elastic;
     }
 
-
-    void build_elastic_index(Matrix<float> &X) {
+    virtual void build_elastic_index(Matrix<float> &X) {
         preprocess_optimal_vector();
         if(elastic_factor_ < 1.0){
             preprocess_cover_relationship();

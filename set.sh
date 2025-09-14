@@ -1,4 +1,4 @@
-export datasets=("arxiv-for-fanns-medium")
+export datasets=("sift")
 labelsets=("zipf")
 
 #export datasets=("sift")

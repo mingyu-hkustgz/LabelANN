@@ -1399,5 +1399,48 @@ namespace hnswlib {
             }
             std::cout << "integrity ok, checked " << connections_checked << " connections\n";
         }
+
+//        void split_with_contain_label(hnswlib::HierarchicalNSWStatic<float> *&appr_alg, BaseFilterFunctor* isIdAllowed = nullptr){
+//            uint64_t filter_cnt = 0;
+//            std::vector<uint64_t> id_map(cur_element_count), select_point;
+//            for(int i = 0;i < cur_element_count; i++){
+//                if((*isIdAllowed)(getExternalLabel(i))) {
+//                    select_point.push_back(i);
+//                    id_map[i] = filter_cnt;
+//                    filter_cnt++;
+//                }
+//            }
+//
+//            appr_alg->maxlevel_ = 0;
+//            appr_alg->cur_element_count = filter_cnt;
+//            appr_alg->enterpoint_node_ = select_point[filter_cnt>>1];
+//
+//#pragma omp parallel for
+//            for(auto &i:select_point){
+//                if((*isIdAllowed)(getExternalLabel(i))){
+//                    std::priority_queue<std::pair<dist_t, tableint>, std::vector<std::pair<dist_t, tableint>>, CompareByFirst> top_candidates;
+//                    top_candidates = searchBaseLayerST<false>(i, getDataByInternalId(i), 100, isIdAllowed);
+//                    uint64_t target = id_map[i];
+//                    getNeighborsByHeuristic2(top_candidates, M_);
+//                    std::vector<tableint> selectedNeighbors;
+//                    selectedNeighbors.reserve(M_);
+//                    while (top_candidates.size() > 0) {
+//                        selectedNeighbors.push_back(top_candidates.top().second);
+//                        top_candidates.pop();
+//                    }
+//
+//                    linklistsizeint *ll_cur;
+//                    ll_cur = appr_alg->get_linklist0(target);
+//                    appr_alg->setListCount(ll_cur, selectedNeighbors.size());
+//                    tableint *data = (tableint *) (ll_cur + 1);
+//                    for (size_t idx = 0; idx < selectedNeighbors.size(); idx++) {
+//                        data[idx] = id_map[selectedNeighbors[idx]];
+//                    }
+//                    *appr_alg->getExternalLabeLp(target) = getExternalLabel(i);
+//                }
+//            }
+//        }
+
+
     };
 }  // namespace hnswlib

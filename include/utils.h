@@ -196,7 +196,8 @@ inline float sqr_dist(const float *d, const float *q, uint32_t L) {
 
 void load_bitmap(const char *filename, std::vector<uint64_t> &label_bitmap, unsigned points_num) {
     if (!isFileExists_ifstream(filename)) {
-        std::cerr << "Label File Not Exists" << std::endl;
+        std::cout << "Label File Not Exists" << std::endl;
+        assert(0);
         return;
     }
     unsigned cumulate_points = 0;
