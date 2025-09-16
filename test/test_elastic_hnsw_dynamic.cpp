@@ -82,19 +82,20 @@ int main(int argc, char *argv[]) {
     auto start_time = std::chrono::high_resolution_clock::now();
     hnsw_elastic.build_elastic_index(X);
     hnsw_elastic.save_log(logger_path);
-    int update_points = (int) X.n - base_num;
-    hnsw_elastic.update_index(update_points, base_label_path);
     cout<<"HNSW Based Finished"<<std::endl;
     auto time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::high_resolution_clock::now() - start_time).count();
     // statistics
     std::cout << "\r-Base Time cost: " << time_cost << "ms" << std::endl;
+    int update_points = (int) X.n - base_num;
+    if(update_points) hnsw_elastic.update_index(update_points, base_label_path);
     std::cout << "\r Update Points: "<< update_points <<std::endl;
     sprintf(logger_path,"./results/%s_dynamic_%d-%d.log", dataset, base_num, update_points + base_num);
 
 
     start_time = std::chrono::high_resolution_clock::now();
-    hnsw_elastic.incremental_elastic_index();
+    hnsw_elastic.set_elastic_factor(elastic_factor);
+    if(update_points) hnsw_elastic.incremental_elastic_index();
     time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::high_resolution_clock::now() - start_time).count();
 

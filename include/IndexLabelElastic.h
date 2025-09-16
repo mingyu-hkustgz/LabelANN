@@ -418,6 +418,7 @@ public:
                 lower_bound = mid;
                 final_elastic = mid;
                 final_ans = selected_bitmap;
+                std::cout<<"Find Solution with Cost:: "<<cost<<std::endl;
             }
             else{
                 upper_bound = mid;

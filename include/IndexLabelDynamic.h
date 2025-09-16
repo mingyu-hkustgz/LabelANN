@@ -55,7 +55,7 @@ public:
     }
 
     uint64_t update_best_fit_schedule() {
-        uint64_t total_cost = 0;
+        uint64_t total_cost = 0, total_points=0;
         uint64_t set_covered_count = 0;
         std::unordered_map<uint64_t, bool> set_check, element_check;
         std::unordered_map<uint64_t, double> set_benefit, set_cover_num;
@@ -92,6 +92,7 @@ public:
             if (std::abs(set_benefit[bitmap] - benefit) < 1e-6) {
                 selected_bitmap.push_back(bitmap);
                 total_cost += set_cost[bitmap];
+                total_points += bitmap_list[bitmap].size();
                 set_check[bitmap] = true;
                 set_covered_count += cover_set_[bitmap].size();
                 for (auto element: cover_set_[bitmap]) {
@@ -110,7 +111,7 @@ public:
             }
         }
         std::cout<<"Total Cost: "<<total_cost<<" with Elastic Factor: "<<elastic_factor_<<std::endl;
-        return total_cost;
+        return total_points;
     }
 
     void binary_search_dynamic_factor(uint64_t cost_bound){
@@ -128,6 +129,7 @@ public:
                 lower_bound = mid;
                 final_elastic = mid;
                 final_ans = selected_bitmap;
+                std::cout<<"Find Solution with Cost:: "<<cost<<std::endl;
             }
             else{
                 upper_bound = mid;
