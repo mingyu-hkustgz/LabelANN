@@ -35,6 +35,9 @@ for data in "${datasets[@]}"; do
   elif [ $data == "deep100M" ]; then
       N=100000000
       QN=1000
+  elif [ $data == "tripclick" ]; then
+      N=1055976
+      QN=10000
   fi
   for L in {12,24};do
 

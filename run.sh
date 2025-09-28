@@ -18,4 +18,4 @@ bash mkdir.sh
 
 #bash ./script/test_inner_product.sh
 
-bash ./script/local_test_dynamic.sh
+#bash ./script/local_test_dynamic.sh

@@ -11,7 +11,7 @@
 template<typename dist_t> char *hnswlib::HierarchicalNSWStatic<dist_t>::static_base_data_ = NULL;
 #define HNSW_ELASTIC_M 16
 #define HNSW_ELASIIC_efConstruction 200
-#define POWER_ELASIIC_BOUND 12
+#define POWER_ELASIIC_BOUND 20
 #define INDEX_ELASIIC_BOUND 4096
 using namespace std;
 
