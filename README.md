@@ -24,5 +24,11 @@
  * ./DATA/sift/sift_base.fvecs
  * ./DATA/sift/sfit_query.fvecs
 
+## Example of Index Select
+![Greedy Algorithm Running Example](./figure/Runing-Example.pdf "Greedy Result")
 
+## Example of Dynamic
+![Index Adjust Example](./figure/dynamic-adjust.pdf "Dynamic Index")
+
+![Handle Unseen Label Example](./figure/dynamic-unseen.pdf "Unseen Label")
 
